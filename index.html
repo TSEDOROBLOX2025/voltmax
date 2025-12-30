@@ -3,625 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOLTMAX - A Energia Que Move A City</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>VOLTMAX • Hub Corporativo de Energia</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        /* --- DESIGN SYSTEM VOLTMAX --- */
         :root {
-            --primary: #63B8FF; /* Azul Claro Oficial */
-            --primary-dark: #3a8ccf;
-            --primary-light: #e0f2fe;
-            --secondary: #0f172a; /* Azul Petróleo Corporativo */
-            --white: #FFFFFF;
-            --bg-gray: #f8fafc;
-            --text-main: #334155;
-            --text-light: #64748b;
-            --danger: #ef4444;
+            --primary: #0062ff;
+            --primary-hover: #0051d4;
+            --bg: #f8fafc;
+            --sidebar: #0f172a;
+            --card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
             --success: #10b981;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --radius: 8px;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
-        /* --- GLOBAL RESET --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: all 0.2s ease-in-out; }
-        body { background-color: var(--bg-gray); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
-        
-        /* --- UTILS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text-main); overflow-x: hidden; }
         .hidden { display: none !important; }
-        .flex-center { display: flex; justify-content: center; align-items: center; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* --- AUTH MODAL --- */
+        #auth-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+        }
+        .auth-card {
+            background: var(--card); padding: 40px; border-radius: var(--radius);
+            width: 100%; max-width: 400px; box-shadow: var(--shadow);
+            animation: modalFade 0.3s ease;
+        }
+        @keyframes modalFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- LAYOUT --- */
+        .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+        .sidebar { background: var(--sidebar); color: white; padding: 30px 20px; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+        .logo { font-size: 22px; font-weight: 800; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .logo i { color: var(--primary); }
         
-        /* --- BUTTONS --- */
-        .btn { display: inline-block; padding: 12px 24px; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; text-decoration: none; font-size: 0.95rem; }
-        .btn-primary { background-color: var(--primary); color: var(--white); box-shadow: 0 4px 14px rgba(99, 184, 255, 0.4); }
-        .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-2px); }
-        .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
-        .btn-outline:hover { background: var(--primary-light); }
-        .btn-danger { background-color: var(--danger); color: white; padding: 6px 12px; font-size: 0.8rem; }
-        .btn-sm { padding: 6px 12px; font-size: 0.85rem; }
+        .nav-link {
+            padding: 12px 15px; border-radius: 8px; cursor: pointer; display: flex;
+            align-items: center; gap: 12px; transition: 0.2s; color: #94a3b8; margin-bottom: 8px;
+        }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: white; }
+        .nav-link.active { background: var(--primary); }
 
-        /* --- HEADER --- */
-        header { background: var(--white); box-shadow: var(--shadow); position: fixed; width: 100%; top: 0; z-index: 1000; height: 70px; display: flex; align-items: center; }
-        .nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 40px; }
-        .brand { font-size: 24px; font-weight: 800; color: var(--secondary); display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px; }
-        .brand span { color: var(--primary); }
-        .nav-menu a { margin-left: 20px; text-decoration: none; color: var(--text-main); font-weight: 500; }
-        .nav-menu a:hover { color: var(--primary); }
-        .nav-actions { display: flex; gap: 10px; }
-
-        /* --- HERO --- */
-        .hero { height: 100vh; background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(99,184,255,0.8)), url('https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; text-align: center; color: white; padding-top: 70px; }
-        .hero-content h1 { font-size: 3.5rem; margin-bottom: 20px; font-weight: 800; }
-        .hero-content p { font-size: 1.25rem; margin-bottom: 40px; opacity: 0.9; }
-
-        /* --- FORMS (LOGIN/REGISTER) --- */
-        .auth-container { height: 100vh; display: flex; justify-content: center; align-items: center; background: #eef2f6; padding-top: 50px; }
-        .auth-card { background: white; padding: 40px; width: 100%; max-width: 400px; border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; border-top: 5px solid var(--primary); }
-        .auth-card h2 { margin-bottom: 10px; color: var(--secondary); }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-light); }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: var(--radius); outline: none; }
-        .form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,184,255,0.2); }
-        .link-text { font-size: 0.9rem; margin-top: 15px; display: block; color: var(--text-light); }
-        .link-text a { color: var(--primary); text-decoration: none; font-weight: 600; }
-
-        /* --- DASHBOARDS --- */
-        .dashboard-header { margin-top: 100px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid #f1f5f9; }
-        .card h3 { margin-bottom: 15px; color: var(--secondary); display: flex; align-items: center; gap: 10px; }
+        /* --- CONTENT --- */
+        main { padding: 40px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
         
-        /* --- TABLE --- */
-        .table-responsive { overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius); overflow: hidden; }
-        th { background: var(--secondary); color: white; padding: 12px; text-align: left; font-size: 0.9rem; }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        /* --- COMPONENTS --- */
+        .card { background: var(--card); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid #e2e8f0; }
+        .stat-val { font-size: 32px; font-weight: 700; margin: 10px 0; color: var(--primary); }
         
-        /* --- NOTIFICATIONS --- */
-        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--secondary); color: white; padding: 15px 25px; border-radius: var(--radius); z-index: 2000; animation: slideUp 0.3s ease; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .btn {
+            padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
+            font-weight: 600; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        
+        input, select, textarea {
+            width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 6px; margin-bottom: 16px;
+        }
 
-        /* --- NOTICE ITEMS --- */
-        .notice-item { border-left: 4px solid var(--primary); padding: 15px; background: #f8fafc; margin-bottom: 10px; border-radius: 0 8px 8px 0; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-        .badge-admin { background: #1e293b; color: white; }
-        .badge-func { background: var(--primary); color: white; }
-        .badge-citizen { background: #94a3b8; color: white; }
+        .badge { padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-admin { background: #fee2e2; color: #ef4444; }
+        .badge-func { background: #dbeafe; color: #3b82f6; }
+        .badge-cid { background: #f1f5f9; color: #64748b; }
+
+        /* --- TABLES --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 13px; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+
+        /* --- TOAST --- */
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; background: var(--sidebar); color: white;
+            padding: 16px 24px; border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 10000; animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        @media (max-width: 768px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+        }
     </style>
 </head>
 <body>
 
-    <header id="main-header">
-        <div class="nav-container">
-            <div class="brand">
+    <div id="auth-overlay">
+        <div class="auth-card" id="login-form">
+            <div class="logo" style="justify-content: center; margin-bottom: 20px;">
                 <i class="fas fa-bolt"></i> VOLT<span>MAX</span>
             </div>
-            <nav class="nav-menu">
-                <a href="#" onclick="router.navigate('home')">Início</a>
-                <a href="#" onclick="router.navigate('home')">Serviços</a>
-                <a href="#" onclick="router.navigate('home')">Contato</a>
-            </nav>
-            <div class="nav-actions" id="nav-auth-buttons">
-                </div>
+            <h2 style="text-align: center; margin-bottom: 20px;">Bem-vindo</h2>
+            <label>Email Corporativo</label>
+            <input type="email" id="email-in" placeholder="usuario@voltmax.com">
+            <label>Senha</label>
+            <input type="password" id="pass-in" placeholder="••••••••">
+            <button class="btn btn-primary" style="width: 100%" onclick="Auth.login()">Entrar no Sistema</button>
+            <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+                Não possui conta? <a href="#" onclick="UI.toggleAuth(false)" style="color: var(--primary)">Solicitar Acesso</a>
+            </p>
         </div>
-    </header>
 
-    <main id="view-home" class="view">
-        <section class="hero">
-            <div class="hero-content">
-                <h1>Energia que move a city</h1>
-                <p>Tecnologia, sustentabilidade e compromisso com o futuro.</p>
-                <div style="display: flex; gap: 15px; justify-content: center;">
-                    <button class="btn btn-primary" onclick="router.navigate('login')">Acessar Minha Conta</button>
-                    <button class="btn btn-outline" style="border-color: white; color: white;" onclick="router.navigate('register')">Criar Nova Conta</button>
-                </div>
+        <div class="auth-card hidden" id="reg-form">
+            <h2>Criar Conta</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">A senha padrão para novos usuários é <b>acessluk</b>.</p>
+            <label>Nome Completo</label>
+            <input type="text" id="reg-name" placeholder="Nome">
+            <label>E-mail</label>
+            <input type="email" id="reg-email" placeholder="email@exemplo.com">
+            <button class="btn btn-primary" style="width: 100%" onclick="Auth.register()">Registrar</button>
+            <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+                Já tem conta? <a href="#" onclick="UI.toggleAuth(true)" style="color: var(--primary)">Voltar ao Login</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="layout hidden" id="app-layout">
+        <aside class="sidebar">
+            <div class="logo"><i class="fas fa-bolt"></i> VOLT<span>MAX</span></div>
+            
+            <div class="nav-link active" onclick="UI.showTab('dash', this)"><i class="fas fa-chart-pie"></i> Dashboard</div>
+            <div class="nav-link" onclick="UI.showTab('notices', this)"><i class="fas fa-bullhorn"></i> Comunicados</div>
+            <div class="nav-link" onclick="UI.showTab('os', this)"><i class="fas fa-file-invoice"></i> Ordens de Serviço</div>
+            <div class="nav-link" id="nav-point" onclick="UI.showTab('point', this)"><i class="fas fa-clock"></i> Registrar Ponto</div>
+            <div class="nav-link hidden" id="nav-admin" onclick="UI.showTab('admin', this)"><i class="fas fa-user-shield"></i> Administração</div>
+            
+            <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div id="user-display" style="font-size: 13px; margin-bottom: 15px;"></div>
+                <div class="nav-link" onclick="Auth.logout()" style="color: var(--danger);"><i class="fas fa-power-off"></i> Sair</div>
             </div>
-        </section>
-        
-        <section class="container" style="padding: 60px 20px;">
-            <h2 style="text-align: center; margin-bottom: 40px; color: var(--secondary);">Nossos Serviços</h2>
-            <div class="card-grid">
+        </aside>
+
+        <main>
+            <section id="tab-dash" class="tab-content">
+                <div class="header-top">
+                    <h1>Dashboard</h1>
+                    <div id="real-time-clock" style="font-weight: 600; color: var(--text-muted);"></div>
+                </div>
+                <div class="grid">
+                    <div class="card">
+                        <h3>Consumo Médio</h3>
+                        <div class="stat-val">48.2 <span style="font-size: 16px; color: var(--text-muted);">kW/h</span></div>
+                        <p style="font-size: 12px; color: var(--success);"><i class="fas fa-arrow-down"></i> 4% em relação ao mês anterior</p>
+                    </div>
+                    <div class="card">
+                        <h3>Economia Verde</h3>
+                        <div class="stat-val" style="color: var(--success);">14.5%</div>
+                        <p style="font-size: 12px; color: var(--text-muted);">Redução de CO2 este ano</p>
+                    </div>
+                    <div class="card">
+                        <h3>O.S. Abertas</h3>
+                        <div class="stat-val" id="os-count">0</div>
+                        <p style="font-size: 12px; color: var(--warning);">Aguardando triagem técnica</p>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 24px;">
+                    <h3>Carga da Rede em Tempo Real (MW)</h3>
+                    <canvas id="consumptionChart" height="100"></canvas>
+                </div>
+            </section>
+
+            <section id="tab-notices" class="tab-content hidden">
+                <div class="header-top">
+                    <h1>Comunicados</h1>
+                    <button class="btn btn-primary hidden" id="btn-new-notice" onclick="UI.modal('modal-notice')"><i class="fas fa-plus"></i> Novo Aviso</button>
+                </div>
+                <div id="notices-container" class="grid"></div>
+            </section>
+
+            <section id="tab-os" class="tab-content hidden">
+                <div class="header-top">
+                    <h1>Ordens de Serviço</h1>
+                    <button class="btn btn-primary" onclick="UI.modal('modal-os')"><i class="fas fa-file-medical"></i> Abrir Chamado</button>
+                </div>
                 <div class="card">
-                    <i class="fas fa-file-invoice fa-2x" style="color: var(--primary); margin-bottom: 15px;"></i>
-                    <h3>Segunda Via</h3>
-                    <p>Emita a segunda via da sua fatura de forma rápida e segura.</p>
-                </div>
-                <div class="card">
-                    <i class="fas fa-hard-hat fa-2x" style="color: var(--primary); margin-bottom: 15px;"></i>
-                    <h3>Manutenção</h3>
-                    <p>Solicite reparos na rede elétrica ou informe quedas de energia.</p>
-                </div>
-                <div class="card">
-                    <i class="fas fa-leaf fa-2x" style="color: var(--primary); margin-bottom: 15px;"></i>
-                    <h3>Sustentabilidade</h3>
-                    <p>Conheça nossos projetos de energia renovável.</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <main id="view-login" class="view hidden auth-container">
-        <div class="auth-card">
-            <div class="brand" style="justify-content: center; margin-bottom: 20px;">
-                <i class="fas fa-bolt"></i> VOLT<span>MAX</span>
-            </div>
-            <h2>Acesso ao Sistema</h2>
-            <form onsubmit="auth.login(event)">
-                <div class="form-group">
-                    <label>Nome de Usuário</label>
-                    <input type="text" id="login-user" required placeholder="Seu usuário">
-                </div>
-                <div class="form-group">
-                    <label>Senha</label>
-                    <input type="password" id="login-pass" required placeholder="Sua senha">
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
-            </form>
-            <span class="link-text">Não tem conta? <a href="#" onclick="router.navigate('register')">Criar conta agora</a></span>
-        </div>
-    </main>
-
-    <main id="view-register" class="view hidden auth-container">
-        <div class="auth-card">
-            <div class="brand" style="justify-content: center; margin-bottom: 20px;">
-                <i class="fas fa-bolt"></i> VOLT<span>MAX</span>
-            </div>
-            <h2>Criar Nova Conta</h2>
-            <p style="font-size: 0.8rem; color: #666; margin-bottom: 20px;">Sua conta será criada como CIDADÃO.</p>
-            <form onsubmit="auth.register(event)">
-                <div class="form-group">
-                    <label>Escolha um Usuário</label>
-                    <input type="text" id="reg-user" required placeholder="Ex: joaosilva">
-                </div>
-                <div class="form-group">
-                    <label>Senha</label>
-                    <input type="password" id="reg-pass" required placeholder="Mínimo 6 caracteres">
-                </div>
-                <div class="form-group">
-                    <label>Confirmar Senha</label>
-                    <input type="password" id="reg-pass-confirm" required placeholder="Repita a senha">
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Criar Conta</button>
-            </form>
-            <span class="link-text">Já tem conta? <a href="#" onclick="router.navigate('login')">Fazer Login</a></span>
-        </div>
-    </main>
-
-    <main id="view-citizen" class="view hidden container">
-        <div class="dashboard-header">
-            <div>
-                <h2>Área do Cidadão</h2>
-                <p>Avisos oficiais e comunicados para seu bairro.</p>
-            </div>
-            <div class="badge badge-citizen">Perfil Cidadão</div>
-        </div>
-        <div class="card">
-            <h3><i class="fas fa-bullhorn"></i> Quadro de Avisos</h3>
-            <div id="citizen-notices-list">Loading...</div>
-        </div>
-    </main>
-
-    <main id="view-employee" class="view hidden container">
-        <div class="dashboard-header">
-            <div>
-                <h2>Portal do Colaborador</h2>
-                <p id="emp-welcome">Bem-vindo à área interna.</p>
-            </div>
-            <div class="badge badge-func">Funcionário</div>
-        </div>
-
-        <div class="card-grid">
-            <div class="card" style="text-align: center;">
-                <h3>Registro de Ponto</h3>
-                <h1 id="clock-display" style="font-size: 3rem; color: var(--secondary); margin: 20px 0;">00:00:00</h1>
-                <button onclick="app.employee.clockIn()" class="btn btn-primary"><i class="fas fa-fingerprint"></i> Registrar Agora</button>
-            </div>
-            <div class="card">
-                <h3>Meu Histórico Hoje</h3>
-                <div id="employee-history-list" style="margin-top: 15px;"></div>
-            </div>
-        </div>
-    </main>
-
-    <main id="view-admin" class="view hidden container">
-        <div class="dashboard-header">
-            <div>
-                <h2>Painel Administrativo</h2>
-                <p>Gestão centralizada do sistema VOLTMAX.</p>
-            </div>
-            <div class="badge badge-admin">Administrador</div>
-        </div>
-
-        <div class="card-grid" style="margin-bottom: 30px;">
-            <div class="card">
-                <h3><i class="fas fa-users"></i> Gestão de Usuários</h3>
-                <p style="margin-bottom: 10px; font-size: 0.9rem; color: #666;">Promova cargos ou bloqueie acessos.</p>
-                <div class="table-responsive">
-                    <table id="admin-users-table">
+                    <table id="os-table">
                         <thead>
-                            <tr>
-                                <th>Usuário</th>
-                                <th>Cargo</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
+                            <tr><th>Protocolo</th><th>Tipo</th><th>Endereço</th><th>Solicitante</th><th>Status</th></tr>
                         </thead>
                         <tbody></tbody>
                     </table>
                 </div>
-            </div>
+            </section>
 
-            <div class="card">
-                <h3><i class="fas fa-newspaper"></i> Publicar Aviso</h3>
-                <form onsubmit="app.admin.postNotice(event)">
-                    <div class="form-group">
-                        <input type="text" id="notice-title" placeholder="Título do Aviso" required>
-                    </div>
-                    <div class="form-group" style="display: flex; gap: 10px;">
-                        <input type="text" id="notice-bairro" placeholder="Bairro" required style="flex:1">
-                        <select id="notice-type" style="padding:10px; border-radius:8px; border:1px solid #ccc;">
-                            <option>Geral</option>
-                            <option>Manutenção</option>
-                            <option>Emergência</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="notice-desc" rows="3" placeholder="Descrição detalhada..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm">Publicar</button>
-                </form>
-                <div id="admin-notices-preview" style="margin-top: 20px; max-height: 200px; overflow-y: auto;"></div>
+            <section id="tab-point" class="tab-content hidden">
+                <h1>Registro de Jornada</h1><br>
+                <div class="card" style="max-width: 500px; text-align: center;">
+                    <i class="fas fa-clock" style="font-size: 48px; color: var(--primary); margin-bottom: 20px;"></i>
+                    <h2 id="point-clock" style="font-size: 32px; margin-bottom: 10px;">00:00:00</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 24px;">Certifique-se de estar no local de trabalho.</p>
+                    <button class="btn btn-primary" onclick="App.registerPoint()">Registrar Entrada/Saída</button>
+                    <div id="last-points" style="margin-top: 30px; text-align: left;"></div>
+                </div>
+            </section>
+
+            <section id="tab-admin" class="tab-content hidden">
+                <h1>Painel Administrativo</h1><br>
+                <div class="card">
+                    <h3>Gestão de Usuários</h3>
+                    <table id="users-table">
+                        <thead>
+                            <tr><th>Nome</th><th>E-mail</th><th>Cargo</th><th>Ações</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="modal-notice" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10000; display:flex; align-items:center; justify-content:center;">
+        <div class="card" style="width: 500px;">
+            <h3>Publicar Comunicado</h3><br>
+            <label>Título</label><input type="text" id="n-title">
+            <label>Conteúdo</label><textarea id="n-desc" rows="4"></textarea>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn btn-primary" onclick="App.publishNotice()">Publicar</button>
+                <button class="btn" onclick="UI.modal('modal-notice')">Cancelar</button>
             </div>
         </div>
-    </main>
+    </div>
+
+    <div id="modal-os" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:10000; display:flex; align-items:center; justify-content:center;">
+        <div class="card" style="width: 500px;">
+            <h3>Abrir Chamado Técnico</h3><br>
+            <label>Tipo de Ocorrência</label>
+            <select id="os-type">
+                <option>Queda de Energia</option>
+                <option>Poste com Defeito</option>
+                <option>Fios Caídos</option>
+                <option>Nova Ligação</option>
+            </select>
+            <label>Endereço Completo</label>
+            <input type="text" id="os-address" placeholder="Rua, Número, Bairro">
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn btn-primary" onclick="App.createOS()">Solicitar Reparo</button>
+                <button class="btn" onclick="UI.modal('modal-os')">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const DB_URL = "https://voltmax-empresa-default-rtdb.firebaseio.com";
-        
-        // --- UTILITÁRIOS ---
-        const $ = (id) => document.getElementById(id);
-        const showToast = (msg) => {
-            const div = document.createElement('div');
-            div.className = 'toast';
-            div.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
-            document.body.appendChild(div);
-            setTimeout(() => div.remove(), 3000);
+        // --- CONFIGURAÇÃO FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAs-Exemplo-Chave-Real",
+            authDomain: "voltmax-empresa.firebaseapp.com",
+            databaseURL: "https://voltmax-empresa-default-rtdb.firebaseio.com/",
+            projectId: "voltmax-empresa",
         };
-        async function hashString(str) {
-            const msgBuffer = new TextEncoder().encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-        // --- CORE APP ---
-        const app = {
-            user: null, // Usuário logado
-            
-            init: async function() {
-                // Relógio
-                setInterval(() => {
-                    const now = new Date();
-                    if($('clock-display')) $('clock-display').innerText = now.toLocaleTimeString('pt-BR');
-                }, 1000);
-
-                // Check Admin Padrão
-                await this.ensureAdminExists();
-
-                // Recuperar Sessão
-                const savedUser = sessionStorage.getItem('voltmax_session');
-                if (savedUser) {
-                    this.user = JSON.parse(savedUser);
-                    router.checkPermissions();
-                } else {
-                    router.navigate('home');
-                }
+        // --- MÓDULO DE AUTENTICAÇÃO ---
+        const Auth = {
+            login() {
+                const email = document.getElementById('email-in').value;
+                const pass = document.getElementById('pass-in').value;
+                auth.signInWithEmailAndPassword(email, pass).catch(err => UI.toast("Erro: " + err.message));
             },
-
-            ensureAdminExists: async function() {
-                // Verifica se admin existe, se não cria (apenas para garantir o acesso inicial)
-                try {
-                    const res = await fetch(`${DB_URL}/users.json`);
-                    const users = await res.json();
-                    let adminFound = false;
-                    if(users) {
-                        Object.values(users).forEach(u => { if(u.username === 'admin') adminFound = true; });
-                    }
-                    
-                    if(!adminFound) {
-                        const passHash = await hashString('acessluk');
-                        const adminData = { username: 'admin', password: passHash, role: 'ADMIN', status: 'active' };
-                        await fetch(`${DB_URL}/users.json`, { method: 'POST', body: JSON.stringify(adminData) });
-                        console.log("Sistema: Admin padrão restaurado.");
-                    }
-                } catch(e) { console.error("Erro conexão DB", e); }
-            },
-
-            // Lógica Específica dos Painéis
-            citizen: {
-                load: async function() {
-                    const res = await fetch(`${DB_URL}/notices.json`);
-                    const data = await res.json();
-                    const list = $('citizen-notices-list');
-                    list.innerHTML = '';
-                    
-                    if(!data) { list.innerHTML = '<p>Nenhum aviso no momento.</p>'; return; }
-
-                    Object.entries(data).reverse().forEach(([id, item]) => {
-                        const div = document.createElement('div');
-                        div.className = 'notice-item';
-                        div.innerHTML = `
-                            <div style="display:flex; justify-content:space-between;">
-                                <strong>${item.titulo}</strong>
-                                <span style="font-size:0.8rem; color:#666;">${item.data}</span>
-                            </div>
-                            <p style="font-size:0.9rem; margin: 5px 0;">${item.descricao}</p>
-                            <small>📍 ${item.bairro} | Tipo: ${item.tipo}</small>
-                        `;
-                        list.appendChild(div);
+            register() {
+                const email = document.getElementById('reg-email').value;
+                const name = document.getElementById('reg-name').value;
+                auth.createUserWithEmailAndPassword(email, "acessluk").then(res => {
+                    db.ref('users/' + res.user.uid).set({
+                        nome: name,
+                        email: email,
+                        role: 'CIDADAO'
                     });
-                }
+                    UI.toast("Conta criada com sucesso!");
+                    UI.toggleAuth(true);
+                }).catch(err => UI.toast(err.message));
             },
+            logout() { auth.signOut(); location.reload(); }
+        };
 
-            employee: {
-                load: async function() {
-                    $('emp-welcome').innerText = `Olá, ${app.user.username}. Registre suas atividades.`;
-                    this.loadHistory();
-                },
-                clockIn: async function() {
-                    const now = new Date();
-                    const record = {
-                        user_id: app.user.id,
-                        data: now.toLocaleDateString('pt-BR'),
-                        hora: now.toLocaleTimeString('pt-BR'),
-                        timestamp: now.getTime()
-                    };
-                    await fetch(`${DB_URL}/hours.json`, { method: 'POST', body: JSON.stringify(record) });
-                    showToast("Ponto registrado com sucesso!");
-                    this.loadHistory();
-                },
-                loadHistory: async function() {
-                    // Fetch simples e filtro no client (para demo)
-                    const res = await fetch(`${DB_URL}/hours.json`);
-                    const data = await res.json();
-                    const list = $('employee-history-list');
-                    list.innerHTML = '';
-                    
-                    if(data) {
-                        const myRecs = Object.values(data)
-                            .filter(r => r.user_id === app.user.id) // Filtra pelo ID do usuário
-                            .sort((a,b) => b.timestamp - a.timestamp)
-                            .slice(0, 5); // Ultimos 5
-                        
-                        myRecs.forEach(r => {
-                            list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee;">✅ ${r.data} às ${r.hora}</div>`;
-                        });
-                    }
-                }
+        // --- MÓDULO DE INTERFACE ---
+        const UI = {
+            toast(msg) {
+                const div = document.createElement('div');
+                div.className = 'toast';
+                div.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+                document.body.appendChild(div);
+                setTimeout(() => div.remove(), 3000);
             },
-
-            admin: {
-                load: async function() {
-                    this.loadUsers();
-                    this.loadNotices();
-                },
-                loadUsers: async function() {
-                    const res = await fetch(`${DB_URL}/users.json`);
-                    const users = await res.json();
-                    const tbody = $('admin-users-table').querySelector('tbody');
-                    tbody.innerHTML = '';
-
-                    if(users) {
-                        Object.entries(users).forEach(([key, u]) => {
-                            if(u.username === 'admin') return; // Não listar superadmin para edição simples
-
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${u.username}</td>
-                                <td><span class="badge ${u.role === 'ADMIN' ? 'badge-admin' : u.role === 'FUNCIONARIO' ? 'badge-func' : 'badge-citizen'}">${u.role}</span></td>
-                                <td>${u.status}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline" onclick="app.admin.changeRole('${key}', 'CIDADAO')">Cid</button>
-                                    <button class="btn btn-sm btn-primary" onclick="app.admin.changeRole('${key}', 'FUNCIONARIO')">Func</button>
-                                    <button class="btn btn-sm btn-danger" onclick="app.admin.changeRole('${key}', 'ADMIN')">Adm</button>
-                                </td>
-                            `;
-                            tbody.appendChild(row);
-                        });
-                    }
-                },
-                changeRole: async function(uid, newRole) {
-                    await fetch(`${DB_URL}/users/${uid}.json`, {
-                        method: 'PATCH',
-                        body: JSON.stringify({ role: newRole })
-                    });
-                    showToast(`Cargo alterado para ${newRole}`);
-                    this.loadUsers();
-                },
-                postNotice: async function(e) {
-                    e.preventDefault();
-                    const notice = {
-                        titulo: $('notice-title').value,
-                        bairro: $('notice-bairro').value,
-                        tipo: $('notice-type').value,
-                        descricao: $('notice-desc').value,
-                        data: new Date().toLocaleDateString('pt-BR')
-                    };
-                    await fetch(`${DB_URL}/notices.json`, { method: 'POST', body: JSON.stringify(notice) });
-                    showToast("Aviso publicado!");
-                    e.target.reset();
-                    this.loadNotices();
-                },
-                loadNotices: async function() {
-                    const res = await fetch(`${DB_URL}/notices.json`);
-                    const data = await res.json();
-                    const div = $('admin-notices-preview');
-                    div.innerHTML = '';
-                    if(data) {
-                        Object.entries(data).reverse().forEach(([k, v]) => {
-                            div.innerHTML += `<div style="font-size:0.8rem; border-bottom:1px solid #eee; padding:5px;"><b>${v.titulo}</b> (${v.bairro}) <span style="color:red; cursor:pointer;" onclick="app.admin.deleteNotice('${k}')">[x]</span></div>`;
-                        });
-                    }
-                },
-                deleteNotice: async function(id) {
-                    if(confirm("Excluir aviso?")) {
-                        await fetch(`${DB_URL}/notices/${id}.json`, { method: 'DELETE' });
-                        this.loadNotices();
-                    }
-                }
+            toggleAuth(showLogin) {
+                document.getElementById('login-form').classList.toggle('hidden', !showLogin);
+                document.getElementById('reg-form').classList.toggle('hidden', showLogin);
+            },
+            modal(id) { document.getElementById(id).classList.toggle('hidden'); },
+            showTab(id, el) {
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.getElementById('tab-' + id).classList.remove('hidden');
+                el.classList.add('active');
             }
         };
 
-        // --- AUTH ---
-        const auth = {
-            login: async function(e) {
-                e.preventDefault();
-                const user = $('login-user').value;
-                const pass = $('login-pass').value;
-                const passHash = await hashString(pass);
+        // --- MÓDULO PRINCIPAL ---
+        const App = {
+            currentUser: null,
+            chart: null,
 
-                // Fetch all users to find match (No Realtime Database REST, não dá para filtrar por 2 campos ao mesmo tempo facilmente sem index, então faremos client-side filter para garantir integridade do login)
-                try {
-                    const res = await fetch(`${DB_URL}/users.json`);
-                    const allUsers = await res.json();
-                    
-                    let foundUser = null;
-                    if(allUsers) {
-                        for(const [key, u] of Object.entries(allUsers)) {
-                            if(u.username === user && u.password === passHash) {
-                                foundUser = { ...u, id: key }; // Injeta o ID do firebase
-                                break;
-                            }
-                        }
-                    }
+            init() {
+                this.handleAuth();
+                this.updateClock();
+                this.initChart();
+            },
 
-                    if(foundUser) {
-                        if(foundUser.status === 'blocked') {
-                            showToast("Conta bloqueada pelo administrador.");
-                            return;
-                        }
-                        
-                        app.user = foundUser;
-                        sessionStorage.setItem('voltmax_session', JSON.stringify(foundUser));
-                        showToast("Login realizado com sucesso!");
-                        
-                        // REDIRECIONAMENTO AUTOMÁTICO
-                        router.redirectBasedOnRole();
+            handleAuth() {
+                auth.onAuthStateChanged(user => {
+                    if (user) {
+                        db.ref('users/' + user.uid).on('value', snap => {
+                            this.currentUser = { uid: user.uid, ...snap.val() };
+                            this.renderByRole();
+                            document.getElementById('auth-overlay').classList.add('hidden');
+                            document.getElementById('app-layout').classList.remove('hidden');
+                            document.getElementById('user-display').innerHTML = `<b>${this.currentUser.nome}</b><br>${this.currentUser.email}`;
+                        });
+                        this.loadData();
                     } else {
-                        showToast("Usuário ou senha incorretos.");
+                        document.getElementById('auth-overlay').classList.remove('hidden');
+                        document.getElementById('app-layout').classList.add('hidden');
                     }
-                } catch(err) {
-                    console.error(err);
-                    showToast("Erro de conexão.");
-                }
+                });
             },
 
-            register: async function(e) {
-                e.preventDefault();
-                const user = $('reg-user').value;
-                const pass = $('reg-pass').value;
-                const confirm = $('reg-pass-confirm').value;
-
-                if(pass !== confirm) return showToast("As senhas não coincidem.");
-                if(pass.length < 6) return showToast("Senha muito curta.");
-
-                // Verifica se usuario ja existe
-                const res = await fetch(`${DB_URL}/users.json`);
-                const allUsers = await res.json();
-                let exists = false;
-                if(allUsers) {
-                    Object.values(allUsers).forEach(u => { if(u.username === user) exists = true; });
-                }
-
-                if(exists) return showToast("Nome de usuário já está em uso.");
-
-                const passHash = await hashString(pass);
-                const newUser = {
-                    username: user,
-                    password: passHash,
-                    role: 'CIDADAO', // REGRA: Sempre começa como cidadão
-                    status: 'active'
-                };
-
-                await fetch(`${DB_URL}/users.json`, { method: 'POST', body: JSON.stringify(newUser) });
-                showToast("Conta criada! Faça login.");
-                router.navigate('login');
-            },
-
-            logout: function() {
-                app.user = null;
-                sessionStorage.removeItem('voltmax_session');
-                router.navigate('home');
-                showToast("Sessão encerrada.");
-            }
-        };
-
-        // --- ROUTER ---
-        const router = {
-            navigate: function(viewName) {
-                // Esconde todas as views
-                document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
-                $('main-header').classList.remove('hidden');
-
-                // Lógica Auth Navbar
-                const navAuth = $('nav-auth-buttons');
-                if(app.user) {
-                    navAuth.innerHTML = `
-                        <span style="font-size:0.9rem; margin-right:10px;">Olá, <b>${app.user.username}</b></span>
-                        <button class="btn btn-sm btn-danger" onclick="auth.logout()">Sair</button>
-                    `;
-                } else {
-                    navAuth.innerHTML = `
-                        <button class="btn btn-sm btn-outline" onclick="router.navigate('login')">Entrar</button>
-                        <button class="btn btn-sm btn-primary" onclick="router.navigate('register')">Criar Conta</button>
-                    `;
-                }
-
-                // Exibe a view alvo
-                if(viewName === 'login') {
-                    $('view-login').classList.remove('hidden');
-                    $('main-header').classList.add('hidden'); // Login fullscreen
-                } else if(viewName === 'register') {
-                    $('view-register').classList.remove('hidden');
-                    $('main-header').classList.add('hidden');
-                } else {
-                    $(`view-${viewName}`).classList.remove('hidden');
-                }
-            },
-
-            redirectBasedOnRole: function() {
-                if(!app.user) return this.navigate('login');
+            renderByRole() {
+                const role = this.currentUser.role;
+                document.getElementById('nav-admin').classList.toggle('hidden', role !== 'ADMIN');
+                document.getElementById('btn-new-notice').classList.toggle('hidden', role !== 'ADMIN');
+                document.getElementById('nav-point').classList.toggle('hidden', role === 'CIDADAO');
                 
-                switch(app.user.role) {
-                    case 'ADMIN':
-                        this.navigate('admin');
-                        app.admin.load();
-                        break;
-                    case 'FUNCIONARIO':
-                        this.navigate('employee');
-                        app.employee.load();
-                        break;
-                    default: // CIDADAO
-                        this.navigate('citizen');
-                        app.citizen.load();
-                        break;
-                }
+                if (role === 'ADMIN') this.loadAdminData();
             },
 
-            checkPermissions: function() {
-                // Se tentar acessar uma rota sem estar logado, ou se estiver logado, manda pro painel correto
-                if(app.user) {
-                    this.redirectBasedOnRole();
-                } else {
-                    this.navigate('home');
-                }
+            loadData() {
+                // Notícias em Tempo Real
+                db.ref('notices').on('value', snap => {
+                    const container = document.getElementById('notices-container');
+                    container.innerHTML = '';
+                    snap.forEach(child => {
+                        const n = child.val();
+                        container.innerHTML += `
+                            <div class="card">
+                                <span class="badge badge-cid">${n.date}</span>
+                                <h3 style="margin-top:10px">${n.title}</h3>
+                                <p style="font-size:14px; color:var(--text-muted); margin:10px 0">${n.desc}</p>
+                                <small>Por: <b>${n.author}</b></small>
+                            </div>`;
+                    });
+                });
+
+                // OS em Tempo Real
+                db.ref('os').on('value', snap => {
+                    const tbody = document.getElementById('os-table').querySelector('tbody');
+                    const osCount = document.getElementById('os-count');
+                    tbody.innerHTML = '';
+                    let count = 0;
+                    snap.forEach(child => {
+                        const o = child.val();
+                        if(o.status === 'PENDENTE') count++;
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>#${child.key.slice(-5)}</td>
+                                <td><b>${o.type}</b></td>
+                                <td>${o.addr}</td>
+                                <td>${o.user}</td>
+                                <td><span class="badge ${o.status === 'PENDENTE' ? 'badge-admin' : 'badge-func'}">${o.status}</span></td>
+                            </tr>`;
+                    });
+                    osCount.innerText = count;
+                });
+                
+                // Ponto em Tempo Real
+                db.ref('hours/' + auth.currentUser.uid).limitToLast(5).on('value', snap => {
+                    const container = document.getElementById('last-points');
+                    container.innerHTML = '<h4>Últimos registros:</h4>';
+                    snap.forEach(child => {
+                        container.innerHTML += `<div style="font-size:13px; padding:5px 0; border-bottom:1px solid #eee">📅 ${child.val().time}</div>`;
+                    });
+                });
+            },
+
+            loadAdminData() {
+                db.ref('users').on('value', snap => {
+                    const tbody = document.getElementById('users-table').querySelector('tbody');
+                    tbody.innerHTML = '';
+                    snap.forEach(child => {
+                        const u = child.val();
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${u.nome}</td>
+                                <td>${u.email}</td>
+                                <td><span class="badge badge-${u.role === 'ADMIN' ? 'admin' : u.role === 'FUNCIONARIO' ? 'func' : 'cid'}">${u.role}</span></td>
+                                <td>
+                                    <button class="btn btn-primary" style="padding:4px 8px; font-size:10px" onclick="App.changeRole('${child.key}', 'FUNCIONARIO')">Func</button>
+                                    <button class="btn btn-primary" style="padding:4px 8px; font-size:10px; background:#1e293b" onclick="App.changeRole('${child.key}', 'ADMIN')">Admin</button>
+                                </td>
+                            </tr>`;
+                    });
+                });
+            },
+
+            publishNotice() {
+                const title = document.getElementById('n-title').value;
+                const desc = document.getElementById('n-desc').value;
+                if(!title || !desc) return;
+                db.ref('notices').push({
+                    title, desc,
+                    date: new Date().toLocaleDateString(),
+                    author: this.currentUser.nome
+                });
+                UI.modal('modal-notice');
+                UI.toast("Comunicado publicado!");
+            },
+
+            createOS() {
+                const type = document.getElementById('os-type').value;
+                const addr = document.getElementById('os-address').value;
+                if(!addr) return;
+                db.ref('os').push({
+                    type, addr,
+                    user: this.currentUser.nome,
+                    status: 'PENDENTE'
+                });
+                UI.modal('modal-os');
+                UI.toast("Chamado aberto com sucesso!");
+            },
+
+            registerPoint() {
+                db.ref('hours/' + this.currentUser.uid).push({
+                    time: new Date().toLocaleString()
+                });
+                UI.toast("Ponto registrado!");
+            },
+
+            changeRole(uid, role) {
+                db.ref('users/' + uid + '/role').set(role);
+                UI.toast("Cargo atualizado!");
+            },
+
+            updateClock() {
+                setInterval(() => {
+                    const now = new Date().toLocaleTimeString();
+                    document.getElementById('real-time-clock').innerText = now;
+                    if(document.getElementById('point-clock')) document.getElementById('point-clock').innerText = now;
+                }, 1000);
+            },
+
+            initChart() {
+                const ctx = document.getElementById('consumptionChart').getContext('2d');
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                        datasets: [{
+                            label: 'Carga em MW',
+                            data: [120, 95, 210, 340, 280, 410, 150],
+                            borderColor: '#0062ff',
+                            backgroundColor: 'rgba(0, 98, 255, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
             }
         };
 
-        // Iniciar
-        document.addEventListener('DOMContentLoaded', () => app.init());
+        // Inicializar aplicação
+        App.init();
 
     </script>
 </body>
