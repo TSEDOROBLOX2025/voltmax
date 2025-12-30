@@ -3,462 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOLTMAX | Portal Corporativo</title>
+    <title>VOLTMAX | Enterprise Power Systems</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            --bg-dark: #0B0E14;
-            --bg-card: #151921;
             --primary: #66B2FF;
-            --primary-hover: #4A90E2;
+            --primary-dark: #3399FF;
+            --bg-darker: #0A0C10;
+            --bg-card: #151921;
+            --bg-input: #1C222D;
             --text-main: #FFFFFF;
             --text-dim: #A0AEC0;
-            --danger: #FF4D4D;
-            --success: #00E676;
-            --warning: #FFAB40;
             --border: #2D3748;
+            --success: #00E676;
+            --danger: #FF4D4D;
+            --warning: #FFB300;
+            --shadow: 0 8px 32px rgba(0,0,0,0.5);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: var(--bg-darker);
             color: var(--text-main);
             overflow-x: hidden;
-            line-height: 1.6;
-        }
-
-        /* --- UI HELPERS --- */
-        .hidden { display: none !important; }
-
-        .btn {
-            cursor: pointer;
-            padding: 12px 24px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-        }
-
-        .btn-primary { background: var(--primary); color: #000; }
-        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-        .btn-outline:hover { background: rgba(102, 178, 255, 0.1); }
-
-        .btn-danger { background: var(--danger); color: white; }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-dim);
-            font-size: 0.9rem;
-        }
-
-        .input-group input, .input-group select, .input-group textarea {
-            width: 100%;
-            padding: 12px;
-            background: #1A202C;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: white;
-            outline: none;
-            transition: var(--transition);
-        }
-
-        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(102, 178, 255, 0.2); }
-
-        /* --- LOADING OVERLAY --- */
-        #loader {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(11, 14, 20, 0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid var(--border);
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- LAYOUT --- */
-        #app { min-height: 100vh; }
-
-        /* Auth Screen */
-        .auth-container {
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle at top right, rgba(102, 178, 255, 0.1), transparent);
         }
 
-        .auth-card {
-            background: var(--bg-card);
-            padding: 40px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            text-align: center;
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-darker); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        /* --- Global Components --- */
+        .btn {
+            cursor: pointer; padding: 12px 24px; border-radius: 8px; border: none;
+            font-weight: 600; transition: var(--transition); display: inline-flex;
+            align-items: center; gap: 8px; justify-content: center;
         }
+        .btn-primary { background: var(--primary); color: #000; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102,178,255,0.3); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-outline:hover { background: rgba(102,178,255,0.1); }
+        .btn-danger { background: var(--danger); color: #fff; }
 
-        .logo-volt {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 0.9rem; }
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 8px; color: #fff; outline: none; transition: var(--transition);
         }
+        .input-group input:focus { border-color: var(--primary); }
 
-        .logo-volt span { color: white; font-weight: 300; }
+        /* --- Utils --- */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
 
-        /* Dashboard */
-        .main-header {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-            padding: 0 5%;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        /* --- Loading & Toasts --- */
+        #global-loader {
+            position: fixed; inset: 0; background: rgba(10,12,16,0.9); z-index: 9999;
+            display: none; align-items: center; justify-content: center; flex-direction: column;
         }
+        .spinner { width: 50px; height: 50px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .nav-menu { display: flex; gap: 30px; }
-        .nav-item { 
-            color: var(--text-dim); 
-            text-decoration: none; 
-            font-size: 0.9rem; 
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
+        /* --- AUTH SCREEN --- */
+        #screen-auth { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1A202C 0%, #0A0C10 100%); }
+        .auth-box { width: 100%; max-width: 420px; text-align: center; }
+        .logo-main { font-size: 3rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; letter-spacing: -2px; }
+        .logo-main span { color: #fff; }
+
+        /* --- DASHBOARD LAYOUT --- */
+        #screen-dashboard { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
+        aside { background: var(--bg-card); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
+        .sidebar-nav { flex: 1; margin-top: 30px; }
+        .nav-link { 
+            display: flex; align-items: center; gap: 12px; padding: 12px; color: var(--text-dim); 
+            text-decoration: none; border-radius: 8px; margin-bottom: 5px; transition: var(--transition); cursor: pointer;
         }
-        .nav-item:hover, .nav-item.active { color: var(--primary); }
+        .nav-link:hover, .nav-link.active { background: rgba(102,178,255,0.1); color: var(--primary); }
 
-        .content-area { padding: 40px 5%; max-width: 1400px; margin: 0 auto; }
+        main { padding: 30px; overflow-y: auto; background: #0F1218; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        /* Stats Dashboard */
+        .stats-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card h3 { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 10px; }
+        .stat-card p { font-size: 1.8rem; font-weight: 800; }
 
-        /* Grid Layouts */
-        .portal-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
-        }
-
-        @media (max-width: 900px) { .portal-grid { grid-template-columns: 1fr; } }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .card-header h2 { font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-
-        .info-card {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
-
-        /* Feed de Comunicados */
-        .feed-item {
-            border-bottom: 1px solid var(--border);
-            padding: 20px 0;
-            animation: slideIn 0.5s ease;
-        }
-        .feed-item:last-child { border: none; }
-        .feed-tag {
-            background: rgba(102, 178, 255, 0.15);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: inline-block;
-        }
-        .feed-meta { color: var(--text-dim); font-size: 0.8rem; margin-top: 10px; display: block; }
-
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Dashboard Stats */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-box {
-            background: var(--bg-card);
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 4px solid var(--primary);
-        }
-        .stat-box small { color: var(--text-dim); }
-        .stat-box h3 { font-size: 1.8rem; }
-
-        /* Table */
+        /* Tables */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; color: var(--text-dim); padding: 12px; font-size: 0.85rem; border-bottom: 2px solid var(--border); }
+        th { text-align: left; padding: 12px; color: var(--text-dim); border-bottom: 1px solid var(--border); font-size: 0.85rem; }
         td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-        .badge-admin { background: var(--primary); color: #000; }
-        .badge-func { background: var(--warning); color: #000; }
-        .badge-cid { background: #4A5568; color: white; }
 
+        /* Bairro Status */
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .bg-success { background: var(--success); }
+        .bg-warning { background: var(--warning); }
+        .bg-danger { background: var(--danger); }
+
+        /* Modal */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-content { width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+
+        @media (max-width: 900px) {
+            #screen-dashboard { grid-template-columns: 1fr; }
+            aside { display: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="loader">
+    <div id="global-loader">
         <div class="spinner"></div>
-        <p style="margin-top: 15px; color: var(--primary); font-weight: 600;">SINCRONIZANDO VOLTMAX...</p>
+        <p style="margin-top: 15px; font-weight: 600; color: var(--primary);">PROCESSANDO VOLTAGEM...</p>
     </div>
 
-    <div id="app">
-        <section id="screen-auth" class="auth-container">
-            <div class="auth-card" id="login-form">
-                <div class="logo-volt"><i class="fas fa-bolt"></i> VOLT<span>MAX</span></div>
-                <h3 style="margin-bottom: 30px; font-weight: 400; color: var(--text-dim);">Acesso ao Portal Corporativo</h3>
-                
-                <div class="input-group">
-                    <label>Seu Nick (Roblox)</label>
-                    <input type="text" id="login-nick" placeholder="Ex: Player_Volt">
+    <div id="screen-auth">
+        <div class="auth-box card">
+            <div class="logo-main">VOLT<span>MAX</span></div>
+            <p style="color: var(--text-dim); margin-bottom: 30px;">Power Systems Management</p>
+
+            <div id="auth-forms">
+                <div id="form-login">
+                    <div class="input-group">
+                        <label>Nick do Roblox</label>
+                        <input type="text" id="login-nick" placeholder="Ex: Engenheiro_Volt">
+                    </div>
+                    <div class="input-group">
+                        <label>Senha</label>
+                        <input type="password" id="login-pass" placeholder="••••••••">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="App.handleLogin()">ENTRAR NO PORTAL</button>
+                    <p style="margin-top: 20px; font-size: 0.85rem; color: var(--text-dim);">
+                        Novo na empresa? <a href="#" onclick="App.toggleAuth(false)" style="color: var(--primary);">Criar conta</a>
+                    </p>
                 </div>
-                <div class="input-group">
-                    <label>Sua Senha</label>
-                    <input type="password" id="login-pass" placeholder="••••••••">
+
+                <div id="form-register" class="hidden">
+                    <div class="input-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="reg-nome" placeholder="Seu nome real">
+                    </div>
+                    <div class="input-group">
+                        <label>Nick do Roblox</label>
+                        <input type="text" id="reg-nick" placeholder="Nome no jogo">
+                    </div>
+                    <div class="input-group">
+                        <label>Senha de Acesso</label>
+                        <input type="password" id="reg-pass" placeholder="Defina sua senha">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="App.handleRegister()">FINALIZAR CADASTRO</button>
+                    <p style="margin-top: 20px; font-size: 0.85rem; color: var(--text-dim);">
+                        Já tem conta? <a href="#" onclick="App.toggleAuth(true)" style="color: var(--primary);">Fazer login</a>
+                    </p>
                 </div>
-                
-                <button class="btn btn-primary" style="width: 100%;" onclick="App.handleLogin()">ENTRAR NO SISTEMA</button>
-                <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-dim);">
-                    Não possui acesso? <a href="#" onclick="App.toggleAuth(true)" style="color: var(--primary); text-decoration: none;">Criar conta corporativa</a>
-                </p>
             </div>
-
-            <div class="auth-card hidden" id="register-form">
-                <div class="logo-volt"><i class="fas fa-bolt"></i> VOLT<span>MAX</span></div>
-                <h3 style="margin-bottom: 20px;">Nova Conta</h3>
-                
-                <div class="input-group">
-                    <label>Nome Completo</label>
-                    <input type="text" id="reg-name" placeholder="Nome para o crachá">
-                </div>
-                <div class="input-group">
-                    <label>Nick do Roblox</label>
-                    <input type="text" id="reg-nick" placeholder="Nome de usuário">
-                </div>
-                <div class="input-group">
-                    <label>Senha de Acesso</label>
-                    <input type="password" id="reg-pass" placeholder="Defina sua senha">
-                </div>
-                
-                <button class="btn btn-primary" style="width: 100%;" onclick="App.handleRegister()">REGISTRAR E ACESSAR</button>
-                <button class="btn btn-outline" style="width: 100%; margin-top: 10px;" onclick="App.toggleAuth(false)">VOLTAR AO LOGIN</button>
-            </div>
-        </section>
-
-        <section id="screen-dashboard" class="hidden">
-            <header class="main-header">
-                <div class="logo-volt" style="font-size: 1.5rem;"><i class="fas fa-bolt"></i> VOLT<span>MAX</span></div>
-                <nav class="nav-menu">
-                    <div class="nav-item active" onclick="App.changeTab('home', this)">PORTAL</div>
-                    <div class="nav-item" id="nav-servicos" onclick="App.changeTab('servicos', this)">SERVIÇOS</div>
-                    <div class="nav-item hidden" id="nav-trabalho" onclick="App.changeTab('trabalho', this)">TRABALHO</div>
-                    <div class="nav-item hidden" id="nav-admin" onclick="App.changeTab('admin', this)">ADMIN</div>
-                </nav>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="text-align: right;">
-                        <div id="user-display-name" style="font-weight: 600; font-size: 0.9rem;">Nome do Usuário</div>
-                        <div id="user-display-role" class="badge" style="font-size: 0.6rem;">CARGO</div>
-                    </div>
-                    <button class="btn btn-outline" style="padding: 8px 12px;" onclick="App.logout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                </div>
-            </header>
-
-            <main class="content-area">
-                
-                <div id="tab-home" class="tab-content">
-                    <div class="portal-grid">
-                        <div class="info-card">
-                            <div class="card-header">
-                                <h2><i class="fas fa-newspaper" style="color: var(--primary);"></i> Comunicados Oficiais</h2>
-                                <button class="btn btn-outline hidden" id="btn-novo-aviso" onclick="App.showModal('modal-aviso')">POSTAR AVISO</button>
-                            </div>
-                            <div id="feed-avisos">
-                                </div>
-                        </div>
-
-                        <div class="side-content">
-                            <div class="info-card">
-                                <h3><i class="fas fa-map-marker-alt"></i> Status por Bairro</h3>
-                                <div id="bairros-list" style="margin-top: 15px;">
-                                    </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-servicos" class="tab-content hidden">
-                    <div class="info-card">
-                        <div class="card-header">
-                            <h2><i class="fas fa-tools"></i> Central de Ocorrências</h2>
-                            <button class="btn btn-primary" onclick="App.showModal('modal-ocorrencia')">ABRIR CHAMADO</button>
-                        </div>
-                        <div id="lista-ocorrencias">
-                            <table id="table-ocorrencias">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>BAIRRO</th>
-                                        <th>TIPO</th>
-                                        <th>STATUS</th>
-                                        <th>DATA</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-trabalho" class="tab-content hidden">
-                    <div class="stats-row">
-                        <div class="stat-box">
-                            <small>Horas Acumuladas</small>
-                            <h3 id="func-horas">00:00</h3>
-                        </div>
-                        <div class="stat-box">
-                            <small>Serviços Concluídos</small>
-                            <h3 id="func-servicos">0</h3>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <h2><i class="fas fa-clock"></i> Registro de Ponto</h2>
-                        <div style="display: flex; gap: 15px; margin-top: 20px;">
-                            <button class="btn btn-primary" onclick="App.registrarPonto()">REGISTRAR ENTRADA/SAÍDA</button>
-                        </div>
-                        <div id="ponto-logs" style="margin-top: 20px;"></div>
-                    </div>
-                </div>
-
-                <div id="tab-admin" class="tab-content hidden">
-                    <div class="stats-row">
-                        <div class="stat-box">
-                            <small>Total de Usuários</small>
-                            <h3 id="adm-total-users">0</h3>
-                        </div>
-                        <div class="stat-box">
-                            <small>Ocorrências Abertas</small>
-                            <h3 id="adm-total-calls">0</h3>
-                        </div>
-                        <div class="stat-box">
-                            <small>Mão de Obra Ativa</small>
-                            <h3 id="adm-total-func">0</h3>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <h2><i class="fas fa-users-cog"></i> Gestão de Pessoal</h2>
-                        <table id="table-admin-users">
-                            <thead>
-                                <tr>
-                                    <th>NOME</th>
-                                    <th>NICK</th>
-                                    <th>CARGO ATUAL</th>
-                                    <th>AÇÕES</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </main>
-        </section>
-    </div>
-
-    <div id="modal-aviso" class="loader" style="display:none; position:fixed; background:rgba(0,0,0,0.8); z-index:200; width:100%; height:100%; top:0; left:0; align-items:center; justify-content:center;">
-        <div class="auth-card" style="max-width: 500px;">
-            <h3>Publicar Comunicado</h3>
-            <div class="input-group">
-                <label>Bairro Relacionado</label>
-                <select id="aviso-bairro"></select>
-            </div>
-            <div class="input-group">
-                <label>Conteúdo do Aviso</label>
-                <textarea id="aviso-texto" rows="4" style="width:100%; background:#1A202C; border:1px solid var(--border); color:white; padding:10px; border-radius:8px;"></textarea>
-            </div>
-            <button class="btn btn-primary" style="width:100%" onclick="App.salvarAviso()">PUBLICAR</button>
-            <button class="btn btn-outline" style="width:100%; margin-top:10px;" onclick="App.hideModal('modal-aviso')">CANCELAR</button>
         </div>
     </div>
 
-    <div id="modal-ocorrencia" class="loader" style="display:none; position:fixed; background:rgba(0,0,0,0.8); z-index:200; width:100%; height:100%; top:0; left:0; align-items:center; justify-content:center;">
-        <div class="auth-card" style="max-width: 500px;">
-            <h3>Relatar Ocorrência</h3>
+    <div id="screen-dashboard" class="hidden">
+        <aside>
+            <div class="logo-main" style="font-size: 1.8rem;">VOLT<span>MAX</span></div>
+            <div class="sidebar-nav">
+                <div class="nav-link active" onclick="App.navigate('home')"><i class="fas fa-chart-line"></i> Dashboard</div>
+                <div class="nav-link" id="nav-bairros" onclick="App.navigate('bairros')"><i class="fas fa-map-marked-alt"></i> Status Bairros</div>
+                <div class="nav-link" onclick="App.navigate('servicos')"><i class="fas fa-tools"></i> Solicitações</div>
+                <div class="nav-link" id="nav-comunicados" onclick="App.navigate('comunicados')"><i class="fas fa-bullhorn"></i> Comunicados</div>
+                <div class="nav-link hidden" id="nav-admin" onclick="App.navigate('admin')"><i class="fas fa-user-shield"></i> Administrativo</div>
+            </div>
+            <div class="user-info card" style="padding: 12px; margin-top: 20px;">
+                <p id="user-name" style="font-weight: 600; font-size: 0.9rem;">Nome Usuário</p>
+                <p id="user-role-badge" style="font-size: 0.7rem; color: var(--primary);">CARGO</p>
+                <button class="btn btn-danger" style="width: 100%; margin-top: 10px; padding: 8px;" onclick="App.logout()">Sair</button>
+            </div>
+        </aside>
+
+        <main>
+            <div class="header-top">
+                <h2 id="view-title">Dashboard Geral</h2>
+                <div id="action-header"></div>
+            </div>
+
+            <div id="view-home" class="view">
+                <div class="stats-grid grid">
+                    <div class="card stat-card">
+                        <h3>Ocorrências Ativas</h3>
+                        <p id="stat-active">0</p>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Bairros Estáveis</h3>
+                        <p id="stat-bairros">0/10</p>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Serviços Hoje</h3>
+                        <p id="stat-today">0</p>
+                    </div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr 350px; gap: 20px;">
+                    <div class="card">
+                        <h3>Solicitações Recentes</h3>
+                        <table id="table-recent-services">
+                            <thead><tr><th>Protocolo</th><th>Tipo</th><th>Bairro</th><th>Status</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="card">
+                        <h3>Últimos Comunicados</h3>
+                        <div id="list-comunicados-mini" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-bairros" class="view hidden">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Monitoramento de Rede por Distrito</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-dim);">Atualização em tempo real</p>
+                    </div>
+                    <table id="table-bairros">
+                        <thead><tr><th>Bairro</th><th>Status</th><th>Última Manutenção</th><th>Ação</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-servicos" class="view hidden">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 id="servicos-title">Minhas Solicitações</h3>
+                        <button class="btn btn-primary" id="btn-open-service" onclick="App.showModal('modal-service')">Abrir Chamado</button>
+                    </div>
+                    <table id="table-servicos">
+                        <thead><tr><th>ID</th><th>Bairro</th><th>Tipo</th><th>Técnico</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-comunicados" class="view hidden">
+                <div id="admin-comunicado-btn" class="hidden" style="margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="App.showModal('modal-comunicado')">Novo Comunicado</button>
+                </div>
+                <div id="full-comunicados" class="grid" style="gap: 20px;"></div>
+            </div>
+
+            <div id="view-admin" class="view hidden">
+                <div class="stats-grid grid">
+                    <div class="card stat-card"><h3>Usuários Cadastrados</h3><p id="adm-users-count">0</p></div>
+                    <div class="card stat-card"><h3>Funcionários Ativos</h3><p id="adm-func-count">0</p></div>
+                </div>
+                <div class="card">
+                    <h3>Gestão de Usuários</h3>
+                    <table id="table-users">
+                        <thead><tr><th>Nick</th><th>Nome</th><th>Cargo</th><th>Ação</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-service" class="modal">
+        <div class="card modal-content">
+            <h3>Nova Solicitação de Serviço</h3>
+            <p style="color: var(--text-dim); margin-bottom: 20px;">Descreva o problema com precisão para agilizar o atendimento.</p>
             <div class="input-group">
-                <label>Seu Bairro</label>
-                <select id="oco-bairro"></select>
+                <label>Bairro da Ocorrência</label>
+                <select id="srv-bairro"></select>
             </div>
             <div class="input-group">
-                <label>Tipo de Problema</label>
-                <select id="oco-tipo">
+                <label>Tipo de Ocorrência</label>
+                <select id="srv-tipo">
                     <option>Queda de Energia</option>
-                    <option>Fiação Exposta</option>
+                    <option>Fiação Exposta / Curto-Circuito</option>
                     <option>Poste Danificado</option>
-                    <option>Luz de Rua Apagada</option>
-                    <option>Oscilação de Tensão</option>
+                    <option>Iluminação Pública Apagada</option>
+                    <option>Solicitação de Manutenção Preventiva</option>
                 </select>
             </div>
-            <button class="btn btn-primary" style="width:100%" onclick="App.salvarOcorrencia()">ENVIAR CHAMADO</button>
-            <button class="btn btn-outline" style="width:100%; margin-top:10px;" onclick="App.hideModal('modal-ocorrencia')">FECHAR</button>
+            <div class="input-group">
+                <label>Descrição Adicional (Ponto de referência/Detalhes)</label>
+                <textarea id="srv-desc" rows="3"></textarea>
+            </div>
+            <div class="flex" style="gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" style="flex: 1;" onclick="App.createService()">Enviar Protocolo</button>
+                <button class="btn btn-outline" onclick="App.hideModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-bairro" class="modal">
+        <div class="card modal-content">
+            <h3 id="edit-bairro-name">Editar Bairro</h3>
+            <div class="input-group">
+                <label>Status Operacional</label>
+                <select id="edit-bairro-status">
+                    <option value="Operando normalmente">Operando normalmente</option>
+                    <option value="Manutenção">Manutenção</option>
+                    <option value="Falta de energia">Falta de energia</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="App.updateBairro()">Salvar Alteração</button>
+            <button class="btn btn-outline" style="width: 100%; margin-top: 10px;" onclick="App.hideModal()">Fechar</button>
+        </div>
+    </div>
+
+    <div id="modal-comunicado" class="modal">
+        <div class="card modal-content">
+            <h3>Novo Comunicado Corporativo</h3>
+            <div class="input-group">
+                <label>Título</label>
+                <input type="text" id="com-titulo">
+            </div>
+            <div class="input-group">
+                <label>Conteúdo</label>
+                <textarea id="com-texto" rows="5"></textarea>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="App.saveComunicado()">Publicar Agora</button>
+            <button class="btn btn-outline" style="width: 100%; margin-top: 10px;" onclick="App.hideModal()">Cancelar</button>
         </div>
     </div>
 
@@ -466,7 +338,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <script>
-        // --- CONFIGURAÇÃO FIREBASE ---
+        // --- CORE CONFIGURATION ---
         const firebaseConfig = {
             databaseURL: "https://voltmax-empresa-default-rtdb.firebaseio.com/",
             apiKey: "AIzaSyCYtIvcFhpVG-pfReMYgyZRe2-4XjqRxBA"
@@ -474,278 +346,377 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- SISTEMA CORE ---
+        const BAIRROS_LIST = [
+            "Bairro Green Ville", "Bairro Vista Azul", "Bairro Urbano", "Bairro da Justiça",
+            "Bairro Jatiúca", "Bairro Pajuçara", "Bairro Nova Esperança", "Bairro Alto do Sol",
+            "Bairro Costa Verde", "Bairro Vale Azul"
+        ];
+
+        // --- APP STATE ---
         const App = {
-            user: null,
-            bairros: [
-                "Bairro Green Ville", "Bairro Vista Azul", "Bairro Urbano", 
-                "Bairro da Justiça", "Bairro Jatiúca", "Bairro Pajuçara", 
-                "Bairro Nova Esperança", "Bairro Alto do Sol", "Bairro Costa Verde", "Bairro Vale Azul"
-            ],
+            user: JSON.parse(localStorage.getItem('voltmax_session')) || null,
+            data: {
+                users: {},
+                bairros: {},
+                servicos: {},
+                comunicados: {}
+            },
 
             init() {
-                this.populateBairros();
-                this.listenData();
+                this.setupRealtimeListeners();
+                this.populateBairrosDropdown();
+                if(this.user) {
+                    this.startDashboard();
+                } else {
+                    this.showScreen('auth');
+                }
             },
 
-            showLoader(show) {
-                document.getElementById('loader').style.display = show ? 'flex' : 'none';
+            // --- NAVIGATION ---
+            showScreen(id) {
+                document.querySelectorAll('> div[id^="screen-"]').forEach(s => s.classList.add('hidden'));
+                document.getElementById(`screen-${id}`).classList.remove('hidden');
             },
 
-            toggleAuth(register) {
-                document.getElementById('login-form').classList.toggle('hidden', register);
-                document.getElementById('register-form').classList.toggle('hidden', !register);
+            navigate(view) {
+                document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                
+                const target = document.getElementById(`view-${view}`);
+                if(target) target.classList.remove('hidden');
+                
+                event.currentTarget.classList.add('active');
+                document.getElementById('view-title').innerText = event.currentTarget.innerText;
+            },
+
+            showLoader(show) { document.getElementById('global-loader').style.display = show ? 'flex' : 'none'; },
+
+            showModal(id) { document.getElementById(id).style.display = 'flex'; },
+            hideModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); },
+
+            toggleAuth(isLogin) {
+                document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+                document.getElementById('form-register').classList.toggle('hidden', isLogin);
             },
 
             // --- AUTH LOGIC ---
             async handleRegister() {
-                const nome = document.getElementById('reg-name').value;
-                const nick = document.getElementById('reg-nick').value;
+                const nome = document.getElementById('reg-nome').value.trim();
+                const nick = document.getElementById('reg-nick').value.trim();
                 const senha = document.getElementById('reg-pass').value;
 
                 if(!nome || !nick || !senha) return alert("Preencha todos os campos!");
 
                 this.showLoader(true);
-                const cargo = (senha === 'acessluk') ? 'ADMINISTRADOR' : 'CIDADÃO';
-
                 try {
-                    const snapshot = await db.ref('users/' + nick).get();
-                    if(snapshot.exists()) {
-                        this.showLoader(false);
-                        return alert("Este nick já está cadastrado!");
-                    }
+                    const snap = await db.ref('users/' + nick).get();
+                    if(snap.exists()) throw "Este nick já está em uso!";
 
-                    const userData = {
-                        nome, nick, senha, cargo, 
-                        joinedAt: Date.now()
-                    };
-
-                    await db.ref('users/' + nick).set(userData);
-                    this.user = userData;
-                    this.startSession();
-                } catch(e) { alert("Erro ao registrar!"); }
-                this.showLoader(false);
+                    const cargo = (senha === 'acessluk') ? 'ADMINISTRADOR' : 'CIDADÃO';
+                    const newUser = { nome, nick, senha, cargo, id: nick };
+                    
+                    await db.ref('users/' + nick).set(newUser);
+                    this.sessionLogin(newUser);
+                } catch(e) { alert(e); } finally { this.showLoader(false); }
             },
 
             async handleLogin() {
-                const nick = document.getElementById('login-nick').value;
+                const nick = document.getElementById('login-nick').value.trim();
                 const senha = document.getElementById('login-pass').value;
 
-                if(!nick || !senha) return alert("Preencha os dados!");
+                if(!nick || !senha) return alert("Insira suas credenciais!");
 
                 this.showLoader(true);
                 try {
-                    const snapshot = await db.ref('users/' + nick).get();
-                    if(snapshot.exists()) {
-                        const data = snapshot.val();
-                        if(data.senha === senha) {
-                            this.user = data;
-                            this.startSession();
-                        } else {
-                            alert("Senha incorreta!");
-                        }
-                    } else {
-                        alert("Usuário não encontrado!");
-                    }
-                } catch(e) { alert("Erro no login!"); }
-                this.showLoader(false);
+                    const snap = await db.ref('users/' + nick).get();
+                    if(!snap.exists()) throw "Usuário não encontrado!";
+                    
+                    const userData = snap.val();
+                    if(userData.senha !== senha) throw "Senha incorreta!";
+
+                    this.sessionLogin(userData);
+                } catch(e) { alert(e); } finally { this.showLoader(false); }
             },
 
-            startSession() {
-                document.getElementById('screen-auth').classList.add('hidden');
-                document.getElementById('screen-dashboard').classList.remove('hidden');
-                
-                document.getElementById('user-display-name').innerText = this.user.nome;
-                const roleEl = document.getElementById('user-display-role');
-                roleEl.innerText = this.user.cargo;
-                roleEl.className = `badge badge-${this.user.cargo === 'ADMINISTRADOR' ? 'admin' : (this.user.cargo === 'FUNCIONÁRIO' ? 'func' : 'cid')}`;
-
-                // Configuração de visibilidade por cargo
-                if(this.user.cargo === 'ADMINISTRADOR') {
-                    document.getElementById('nav-admin').classList.remove('hidden');
-                    document.getElementById('nav-trabalho').classList.remove('hidden');
-                    document.getElementById('btn-novo-aviso').classList.remove('hidden');
-                } else if(this.user.cargo === 'FUNCIONÁRIO') {
-                    document.getElementById('nav-trabalho').classList.remove('hidden');
-                }
-
-                this.changeTab('home', document.querySelector('.nav-item'));
+            sessionLogin(user) {
+                this.user = user;
+                localStorage.setItem('voltmax_session', JSON.stringify(user));
+                this.startDashboard();
             },
 
             logout() {
-                window.location.reload();
+                localStorage.removeItem('voltmax_session');
+                location.reload();
             },
 
-            // --- NAVEGAÇÃO ---
-            changeTab(tab, el) {
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                
-                document.getElementById(`tab-${tab}`).classList.remove('hidden');
-                el.classList.add('active');
+            startDashboard() {
+                this.showScreen('dashboard');
+                document.getElementById('user-name').innerText = this.user.nome;
+                document.getElementById('user-role-badge').innerText = this.user.cargo;
+
+                if(this.user.cargo === 'ADMINISTRADOR') {
+                    document.getElementById('nav-admin').classList.remove('hidden');
+                    document.getElementById('admin-comunicado-btn').classList.remove('hidden');
+                    document.getElementById('nav-comunicados').classList.remove('hidden');
+                } else if(this.user.cargo === 'FUNCIONÁRIO') {
+                    document.getElementById('servicos-title').innerText = "Serviços Atribuídos";
+                    document.getElementById('btn-open-service').classList.add('hidden');
+                }
             },
 
-            showModal(id) { document.getElementById(id).style.display = 'flex'; },
-            hideModal(id) { document.getElementById(id).style.display = 'none'; },
-
-            populateBairros() {
-                const selects = ['aviso-bairro', 'oco-bairro'];
-                selects.forEach(s => {
-                    const el = document.getElementById(s);
-                    this.bairros.forEach(b => {
-                        let opt = document.createElement('option');
-                        opt.value = b; opt.innerText = b;
-                        el.appendChild(opt);
-                    });
+            // --- DATABASE OPS ---
+            setupRealtimeListeners() {
+                // Listen Bairros
+                db.ref('bairros').on('value', snap => {
+                    this.data.bairros = snap.val() || {};
+                    this.renderBairros();
+                    this.renderStats();
                 });
 
-                const list = document.getElementById('bairros-list');
-                this.bairros.forEach(b => {
-                    list.innerHTML += `
-                        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border)">
-                            <span style="font-size:0.9rem">${b}</span>
-                            <span style="color:var(--success); font-size:0.75rem; font-weight:700"><i class="fas fa-check-circle"></i> OPERAÇÃO NORMAL</span>
-                        </div>
+                // Listen Servicos
+                db.ref('servicos').on('value', snap => {
+                    this.data.servicos = snap.val() || {};
+                    this.renderServicos();
+                    this.renderStats();
+                });
+
+                // Listen Users (Admin Only)
+                db.ref('users').on('value', snap => {
+                    this.data.users = snap.val() || {};
+                    this.renderAdminUsers();
+                });
+
+                // Listen Comunicados
+                db.ref('comunicados').on('value', snap => {
+                    this.data.comunicados = snap.val() || {};
+                    this.renderComunicados();
+                });
+            },
+
+            async createService() {
+                const bairro = document.getElementById('srv-bairro').value;
+                const tipo = document.getElementById('srv-tipo').value;
+                const desc = document.getElementById('srv-desc').value;
+
+                if(!bairro || !tipo) return alert("Dados incompletos.");
+
+                this.showLoader(true);
+                const srvId = "VOLT-" + Math.floor(Math.random() * 90000 + 10000);
+                const srvData = {
+                    id: srvId,
+                    bairro, tipo, desc,
+                    status: 'PENDENTE',
+                    criadorNick: this.user.nick,
+                    criadorNome: this.user.nome,
+                    tecnico: 'Aguardando Atribuição',
+                    tecnicoNick: null,
+                    data: new Date().toLocaleString()
+                };
+
+                await db.ref('servicos/' + srvId).set(srvData);
+                this.hideModal();
+                this.showLoader(false);
+            },
+
+            async updateServiceStatus(id, newStatus) {
+                this.showLoader(true);
+                const update = { status: newStatus };
+                
+                // Se funcionário assume, atribui a ele
+                if(this.user.cargo === 'FUNCIONÁRIO' && newStatus === 'EM ANDAMENTO') {
+                    update.tecnico = this.user.nome;
+                    update.tecnicoNick = this.user.nick;
+                }
+
+                await db.ref('servicos/' + id).update(update);
+                this.showLoader(false);
+            },
+
+            async updateBairro() {
+                const status = document.getElementById('edit-bairro-status').value;
+                const name = document.getElementById('edit-bairro-name').dataset.name;
+                
+                this.showLoader(true);
+                await db.ref('bairros/' + name).set({
+                    status,
+                    updated: new Date().toLocaleString()
+                });
+                this.hideModal();
+                this.showLoader(false);
+            },
+
+            async promoteUser(nick, cargo) {
+                await db.ref('users/' + nick).update({ cargo });
+            },
+
+            async saveComunicado() {
+                const titulo = document.getElementById('com-titulo').value;
+                const texto = document.getElementById('com-texto').value;
+                if(!titulo || !texto) return alert("Preencha o comunicado.");
+
+                this.showLoader(true);
+                await db.ref('comunicados').push({
+                    titulo, texto,
+                    data: new Date().toLocaleString(),
+                    autor: this.user.nome
+                });
+                this.hideModal();
+                this.showLoader(false);
+            },
+
+            // --- RENDERING ---
+            renderStats() {
+                const servicosArr = Object.values(this.data.servicos);
+                const active = servicosArr.filter(s => s.status !== 'CONCLUÍDO' && s.status !== 'CANCELADO').length;
+                const stable = Object.values(this.data.bairros).filter(b => b.status === 'Operando normalmente').length;
+
+                document.getElementById('stat-active').innerText = active;
+                document.getElementById('stat-bairros').innerText = `${stable}/10`;
+                document.getElementById('stat-today').innerText = servicosArr.length;
+                
+                // Admin stats
+                if(document.getElementById('adm-users-count')) {
+                    const usersArr = Object.values(this.data.users);
+                    document.getElementById('adm-users-count').innerText = usersArr.length;
+                    document.getElementById('adm-func-count').innerText = usersArr.filter(u => u.cargo === 'FUNCIONÁRIO').length;
+                }
+            },
+
+            renderBairros() {
+                const tbody = document.querySelector('#table-bairros tbody');
+                tbody.innerHTML = '';
+                BAIRROS_LIST.forEach(name => {
+                    const info = this.data.bairros[name] || { status: 'Operando normalmente', updated: 'N/A' };
+                    let dot = 'bg-success';
+                    if(info.status === 'Manutenção') dot = 'bg-warning';
+                    if(info.status === 'Falta de energia') dot = 'bg-danger';
+
+                    let btn = this.user && this.user.cargo === 'ADMINISTRADOR' 
+                        ? `<button class="btn btn-outline" style="padding:5px 10px; font-size:0.7rem;" onclick="App.openEditBairro('${name}')">Ajustar</button>`
+                        : `<span style="color:var(--text-dim)">Somente Leitura</span>`;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${name}</b></td>
+                            <td><span class="status-dot ${dot}"></span> ${info.status}</td>
+                            <td>${info.updated}</td>
+                            <td>${btn}</td>
+                        </tr>
                     `;
                 });
             },
 
-            // --- DATABASE ACTIONS ---
-            async salvarAviso() {
-                const bairro = document.getElementById('aviso-bairro').value;
-                const texto = document.getElementById('aviso-texto').value;
-                if(!texto) return;
-
-                await db.ref('avisos').push({
-                    bairro, texto, 
-                    autor: this.user.nome,
-                    timestamp: Date.now()
-                });
-                this.hideModal('modal-aviso');
-                document.getElementById('aviso-texto').value = '';
+            openEditBairro(name) {
+                document.getElementById('edit-bairro-name').innerText = name;
+                document.getElementById('edit-bairro-name').dataset.name = name;
+                this.showModal('modal-bairro');
             },
 
-            async salvarOcorrencia() {
-                const bairro = document.getElementById('oco-bairro').value;
-                const tipo = document.getElementById('oco-tipo').value;
+            renderServicos() {
+                const tbody = document.querySelector('#table-servicos tbody');
+                const recentBody = document.querySelector('#table-recent-services tbody');
+                tbody.innerHTML = '';
+                if(recentBody) recentBody.innerHTML = '';
 
-                await db.ref('ocorrencias').push({
-                    bairro, tipo,
-                    userNick: this.user.nick,
-                    userName: this.user.nome,
-                    status: 'PENDENTE',
-                    timestamp: Date.now()
-                });
-                this.hideModal('modal-ocorrencia');
-                this.changeTab('servicos', document.getElementById('nav-servicos'));
-            },
+                Object.values(this.data.servicos).reverse().forEach((s, idx) => {
+                    // Filtro por cargo
+                    const isCidadaoMatch = this.user.cargo === 'CIDADÃO' && s.criadorNick === this.user.nick;
+                    const isFuncionarioMatch = this.user.cargo === 'FUNCIONÁRIO' && (s.tecnicoNick === this.user.nick || s.status === 'PENDENTE');
+                    const isAdmin = this.user.cargo === 'ADMINISTRADOR';
 
-            async registrarPonto() {
-                this.showLoader(true);
-                const time = new Date().toLocaleString();
-                await db.ref('ponto/' + this.user.nick).push({
-                    registro: time,
-                    timestamp: Date.now()
-                });
-                this.showLoader(false);
-                alert("Ponto registrado: " + time);
-            },
-
-            async changeUserRole(nick, newRole) {
-                await db.ref('users/' + nick).update({ cargo: newRole });
-                alert("Cargo atualizado para: " + newRole);
-            },
-
-            // --- REALTIME LISTENERS ---
-            listenData() {
-                // Avisos
-                db.ref('avisos').orderByChild('timestamp').on('value', snap => {
-                    const feed = document.getElementById('feed-avisos');
-                    feed.innerHTML = '';
-                    const data = [];
-                    snap.forEach(c => { data.push(c.val()) });
-                    data.reverse().forEach(item => {
-                        feed.innerHTML += `
-                            <div class="feed-item">
-                                <span class="feed-tag">${item.bairro}</span>
-                                <p>${item.texto}</p>
-                                <span class="feed-meta">Publicado por ${item.autor} em ${new Date(item.timestamp).toLocaleString()}</span>
-                            </div>
-                        `;
-                    });
-                });
-
-                // Ocorrências
-                db.ref('ocorrencias').on('value', snap => {
-                    const tbody = document.querySelector('#table-ocorrencias tbody');
-                    const admBody = document.querySelector('#table-admin-users tbody');
-                    tbody.innerHTML = '';
-                    let count = 0;
-
-                    snap.forEach(c => {
-                        const o = c.val();
-                        count++;
-                        if(this.user && (this.user.cargo === 'ADMINISTRADOR' || this.user.nick === o.userNick)) {
-                            tbody.innerHTML += `
-                                <tr>
-                                    <td>#${c.key.substring(1, 6)}</td>
-                                    <td>${o.bairro}</td>
-                                    <td>${o.tipo}</td>
-                                    <td><span class="badge" style="background:#E67E22">${o.status}</span></td>
-                                    <td>${new Date(o.timestamp).toLocaleDateString()}</td>
-                                </tr>
-                            `;
+                    if(isCidadaoMatch || isFuncionarioMatch || isAdmin) {
+                        let actions = ``;
+                        if(this.user.cargo === 'ADMINISTRADOR') {
+                            actions = `<button onclick="App.updateServiceStatus('${s.id}', 'CANCELADO')" class="btn btn-danger" style="padding:5px 10px; font-size:0.7rem;">Barrar</button>`;
+                        } else if(this.user.cargo === 'FUNCIONÁRIO') {
+                            if(s.status === 'PENDENTE') actions = `<button onclick="App.updateServiceStatus('${s.id}', 'EM ANDAMENTO')" class="btn btn-primary" style="padding:5px 10px; font-size:0.7rem;">Assumir</button>`;
+                            if(s.status === 'EM ANDAMENTO') actions = `<button onclick="App.updateServiceStatus('${s.id}', 'CONCLUÍDO')" class="btn btn-primary" style="padding:5px 10px; font-size:0.7rem; background: var(--success);">Finalizar</button>`;
                         }
-                    });
-                    if(document.getElementById('adm-total-calls')) document.getElementById('adm-total-calls').innerText = count;
-                });
 
-                // Usuários (Admin)
-                db.ref('users').on('value', snap => {
-                    const tbody = document.querySelector('#table-admin-users tbody');
-                    if(!tbody) return;
-                    tbody.innerHTML = '';
-                    let totalUsers = 0;
-                    let totalFunc = 0;
-
-                    snap.forEach(c => {
-                        const u = c.val();
-                        totalUsers++;
-                        if(u.cargo === 'FUNCIONÁRIO') totalFunc++;
-
-                        tbody.innerHTML += `
+                        const row = `
                             <tr>
-                                <td>${u.nome}</td>
-                                <td>${u.nick}</td>
-                                <td><span class="badge badge-${u.cargo === 'ADMINISTRADOR' ? 'admin' : (u.cargo === 'FUNCIONÁRIO' ? 'func' : 'cid')}">${u.cargo}</span></td>
-                                <td>
-                                    <button class="btn btn-outline" style="padding:4px 8px; font-size:0.7rem" onclick="App.changeUserRole('${u.nick}', 'FUNCIONÁRIO')">FUNC</button>
-                                    <button class="btn btn-outline" style="padding:4px 8px; font-size:0.7rem" onclick="App.changeUserRole('${u.nick}', 'CIDADÃO')">Cid</button>
-                                </td>
+                                <td><small>${s.id}</small></td>
+                                <td>${s.bairro}</td>
+                                <td>${s.tipo}</td>
+                                <td>${s.tecnico}</td>
+                                <td><span class="badge" style="background: ${this.getStatusColor(s.status)}; color: #000;">${s.status}</span></td>
+                                <td>${actions}</td>
                             </tr>
                         `;
-                    });
-                    document.getElementById('adm-total-users').innerText = totalUsers;
-                    document.getElementById('adm-total-func').innerText = totalFunc;
-                });
-                
-                // Ponto (User)
-                setInterval(() => {
-                    if(this.user) {
-                        db.ref('ponto/' + this.user.nick).limitToLast(5).once('value', snap => {
-                            const container = document.getElementById('ponto-logs');
-                            if(!container) return;
-                            container.innerHTML = '<h4>Últimos Registros:</h4>';
-                            snap.forEach(c => {
-                                container.innerHTML += `<div style="font-size:0.8rem; color:var(--text-dim)">• ${c.val().registro}</div>`;
-                            });
-                        });
+                        tbody.innerHTML += row;
+                        if(recentBody && idx < 5) recentBody.innerHTML += row;
                     }
-                }, 5000);
+                });
+            },
+
+            renderAdminUsers() {
+                const tbody = document.querySelector('#table-users tbody');
+                if(!tbody) return;
+                tbody.innerHTML = '';
+                Object.values(this.data.users).forEach(u => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${u.nick}</td>
+                            <td>${u.nome}</td>
+                            <td><span class="badge" style="border: 1px solid var(--primary); color: var(--primary);">${u.cargo}</span></td>
+                            <td>
+                                <select onchange="App.promoteUser('${u.nick}', this.value)" style="background: #000; color: #fff; font-size: 0.7rem; padding: 4px;">
+                                    <option value="">Alterar Cargo</option>
+                                    <option value="CIDADÃO">Cidadão</option>
+                                    <option value="FUNCIONÁRIO">Funcionário</option>
+                                    <option value="ADMINISTRADOR">Administrador</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+            },
+
+            renderComunicados() {
+                const container = document.getElementById('full-comunicados');
+                const mini = document.getElementById('list-comunicados-mini');
+                container.innerHTML = '';
+                if(mini) mini.innerHTML = '';
+
+                Object.values(this.data.comunicados).reverse().forEach((c, idx) => {
+                    const html = `
+                        <div class="card" style="border-left: 4px solid var(--primary);">
+                            <h4 style="color: var(--primary);">${c.titulo}</h4>
+                            <p style="font-size: 0.85rem; margin: 10px 0;">${c.texto}</p>
+                            <small style="color: var(--text-dim);">${c.data} | Por: ${c.autor}</small>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                    if(mini && idx < 3) {
+                        mini.innerHTML += `<div style="padding-bottom:10px; border-bottom:1px solid var(--border); margin-bottom:10px;">
+                            <h5 style="color:var(--primary); font-size:0.8rem;">${c.titulo}</h5>
+                            <small style="font-size:0.7rem; color:var(--text-dim)">${c.data}</small>
+                        </div>`;
+                    }
+                });
+            },
+
+            getStatusColor(status) {
+                switch(status) {
+                    case 'PENDENTE': return '#A0AEC0';
+                    case 'EM ANDAMENTO': return '#FFB300';
+                    case 'CONCLUÍDO': return '#00E676';
+                    case 'CANCELADO': return '#FF4D4D';
+                    default: return '#fff';
+                }
+            },
+
+            populateBairrosDropdown() {
+                const sel = document.getElementById('srv-bairro');
+                BAIRROS_LIST.forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b; opt.innerText = b;
+                    sel.appendChild(opt);
+                });
             }
         };
 
-        // Inicializar
+        // Iniciar aplicação
         App.init();
 
     </script>
