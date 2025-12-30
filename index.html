@@ -1,485 +1,692 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOLTMAX | Hub Corporativo de Energia</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-
+    <title>VOLTMAX Enterprise System</title>
     <style>
+        /* =========================================
+           CORE STYLES & RESET
+           ========================================= */
         :root {
+            --primary: #66B2FF;
+            --primary-dark: #3399ff;
             --white: #FFFFFF;
-            --blue-main: #66B2FF;
-            --blue-dark: #4A90E2;
-            --gray-bg: #F4F7F9;
+            --bg-light: #F4F7FA;
             --text-dark: #2C3E50;
-            --text-light: #7F8C8D;
-            --shadow: 0 4px 15px rgba(0,0,0,0.1);
-            --transition: all 0.3s ease;
+            --text-gray: #7F8C8D;
+            --danger: #E74C3C;
+            --success: #2ECC71;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--gray-bg); color: var(--text-dark); line-height: 1.6; }
-        h1, h2, h3 { font-family: 'Montserrat', sans-serif; font-weight: 700; }
-        button { cursor: pointer; border: none; font-family: 'Montserrat', sans-serif; transition: var(--transition); }
-        .hidden { display: none !important; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-        /* --- UI COMPONENTS --- */
-        .btn-primary { background: var(--blue-main); color: var(--white); padding: 12px 25px; border-radius: 5px; font-weight: 600; }
-        .btn-primary:hover { background: var(--blue-dark); transform: translateY(-2px); }
-        .btn-outline { background: transparent; border: 2px solid var(--blue-main); color: var(--blue-main); padding: 10px 23px; border-radius: 5px; font-weight: 600; }
-        .btn-outline:hover { background: var(--blue-main); color: var(--white); }
-        .card { background: var(--white); padding: 25px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 20px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #DDD; border-radius: 6px; font-size: 1rem; }
-
-        /* --- LAYOUT: LANDING PAGE --- */
-        #page-landing {
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
             height: 100vh;
-            background: linear-gradient(135deg, #ffffff 0%, #e6f2ff 100%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
         }
-        .logo-container { margin-bottom: 30px; }
-        .logo-container i { font-size: 80px; color: var(--blue-main); margin-bottom: 10px; }
-        .logo-container h1 { font-size: 3.5rem; letter-spacing: -2px; color: var(--blue-dark); }
-        .slogan { font-size: 1.2rem; color: var(--text-light); margin-bottom: 40px; }
 
-        /* --- AUTH PAGES --- */
-        .auth-box { max-width: 400px; width: 90%; margin: 50px auto; background: var(--white); padding: 40px; border-radius: 15px; box-shadow: var(--shadow); }
-        .auth-box h2 { text-align: center; margin-bottom: 25px; color: var(--blue-dark); }
+        /* =========================================
+           UI COMPONENTS
+           ========================================= */
+        .container {
+            width: 100%;
+            max-width: 480px; /* Mobile first focus, confined width for enterprise cards */
+            margin: 0 auto;
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-        /* --- SYSTEM PANELS --- */
-        #system-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: var(--blue-dark); color: var(--white); padding: 30px 20px; position: fixed; height: 100vh; }
-        .sidebar h2 { font-size: 1.5rem; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
-        .nav-menu { list-style: none; }
-        .nav-menu li { padding: 15px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 12px; }
-        .nav-menu li:hover, .nav-menu li.active { background: rgba(255,255,255,0.2); }
-        .main-content { margin-left: 260px; flex: 1; padding: 40px; }
-        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #EEE; padding-bottom: 20px; }
+        .card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
 
-        /* --- DASHBOARD ELEMENTS --- */
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
-        .status-on { background: #D4EDDA; color: #155724; }
-        .status-off { background: #F8D7DA; color: #721C24; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--text-gray);
+        }
+
+        .logo-area {
+            margin-bottom: 30px;
+        }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 15px; background: #f8f9fa; border-bottom: 2px solid #dee2e6; }
-        td { padding: 15px; border-bottom: 1px solid #dee2e6; }
+        .logo-icon {
+            font-size: 3rem;
+            color: var(--primary);
+        }
 
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; padding: 20px; }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E0E0E0;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 178, 255, 0.4);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+            margin-top: 20px;
+        }
+
+        /* Feedback & Loading */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            display: none; /* Toggled via JS */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: var(--radius);
+            color: white;
+            font-weight: bold;
+            box-shadow: var(--shadow);
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.4s ease;
+        }
+
+        .toast.visible { opacity: 1; transform: translateX(0); }
+        .toast.success { background-color: var(--success); }
+        .toast.error { background-color: var(--danger); }
+
+        /* Screens Visibility */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* Dashboard Specifics */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: left;
+            border-radius: 4px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .badge-admin { background: #8e44ad; color: white; }
+        .badge-cidadao { background: #27ae60; color: white; }
+        .badge-funcionario { background: #e67e22; color: white; }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
         }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="hidden" style="position:fixed; inset:0; background:rgba(255,255,255,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;">
-        <i class="fas fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--blue-main);"></i>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px; font-weight: 600; color: var(--primary);">Processando...</p>
     </div>
 
-    <section id="page-landing">
-        <div class="logo-container">
-            <i class="fas fa-bolt"></i>
-            <h1>VOLTMAX</h1>
-            <p class="slogan">Energia Inteligente para o Futuro da Cidade</p>
-        </div>
-        <div style="display: flex; gap: 20px;">
-            <button class="btn-primary" onclick="showSection('page-login')">ENTRAR</button>
-            <button class="btn-outline" onclick="showSection('page-register')">CRIAR CONTA</button>
-        </div>
-    </section>
+    <div id="toast-container" class="toast"></div>
 
-    <section id="page-register" class="hidden">
-        <div class="auth-box">
-            <h2>Criar Conta</h2>
-            <input type="text" id="reg-nome" placeholder="Nome Completo">
-            <input type="text" id="reg-nick" placeholder="Nick do Roblox">
-            <input type="password" id="reg-pass" placeholder="Senha">
-            <button class="btn-primary" style="width:100%; margin-top:15px;" onclick="handleRegister()">REGISTRAR</button>
-            <p style="text-align:center; margin-top:20px; font-size:0.9rem;">
-                Já tem conta? <a href="#" onclick="showSection('page-login')">Entrar</a>
-            </p>
-        </div>
-    </section>
-
-    <section id="page-login" class="hidden">
-        <div class="auth-box">
-            <h2>Acesso Restrito</h2>
-            <input type="text" id="log-nick" placeholder="Seu Nick do Roblox">
-            <input type="password" id="log-pass" placeholder="Sua Senha">
-            <button class="btn-primary" style="width:100%; margin-top:15px;" onclick="handleLogin()">ACESSAR SISTEMA</button>
-            <p style="text-align:center; margin-top:20px; font-size:0.9rem;">
-                Não possui conta? <a href="#" onclick="showSection('page-register')">Cadastrar</a>
-            </p>
-        </div>
-    </section>
-
-    <section id="system-layout" class="hidden">
-        <aside class="sidebar">
-            <h2><i class="fas fa-bolt"></i> VOLTMAX</h2>
-            <ul class="nav-menu" id="nav-dynamic">
-                </ul>
-            <div style="position: absolute; bottom: 30px; width: 85%;">
-                <button class="btn-outline" style="width:100%; border-color:white; color:white;" onclick="logout()">SAIR</button>
+    <div id="screen-home" class="container screen active">
+        <div class="card">
+            <div class="logo-area">
+                <div class="logo-icon">⚡</div>
+                <h1>VOLTMAX</h1>
+                <h2>Energia para o Futuro</h2>
             </div>
-        </aside>
+            <p style="margin-bottom: 30px; color: var(--text-gray);">
+                Sistema Corporativo Integrado v2.0
+            </p>
+            
+            <button class="btn btn-primary" onclick="App.router.navigate('register')">CRIAR CONTA</button>
+            <button class="btn btn-outline" onclick="App.router.navigate('login')">ENTRAR</button>
+        </div>
+    </div>
 
-        <main class="main-content">
-            <header class="top-header">
+    <div id="screen-register" class="container screen">
+        <div class="card">
+            <h1 style="font-size: 1.5rem;">Nova Conta</h1>
+            <p style="margin-bottom: 20px;">Junte-se ao sistema Voltmax</p>
+
+            <div class="form-group">
+                <label>Nome Completo</label>
+                <input type="text" id="reg-name" placeholder="Seu nome real">
+            </div>
+
+            <div class="form-group">
+                <label>Nick do Roblox (Login)</label>
+                <input type="text" id="reg-nick" placeholder="Ex: PlayerOne123">
+            </div>
+
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="reg-pass" placeholder="Crie uma senha segura">
+            </div>
+
+            <button class="btn btn-primary" onclick="App.auth.register()">CONFIRMAR CADASTRO</button>
+            <button class="btn btn-outline" onclick="App.router.navigate('home')">VOLTAR</button>
+        </div>
+    </div>
+
+    <div id="screen-login" class="container screen">
+        <div class="card">
+            <h1 style="font-size: 1.5rem;">Acesso Restrito</h1>
+            <p style="margin-bottom: 20px;">Identifique-se para continuar</p>
+
+            <div class="form-group">
+                <label>Nick do Roblox</label>
+                <input type="text" id="login-nick" placeholder="Seu nick de usuário">
+            </div>
+
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="login-pass" placeholder="Sua senha">
+            </div>
+
+            <button class="btn btn-primary" onclick="App.auth.login()">ACESSAR SISTEMA</button>
+            <button class="btn btn-outline" onclick="App.router.navigate('home')">VOLTAR</button>
+        </div>
+    </div>
+
+    <div id="screen-dashboard" class="container screen" style="max-width: 800px;">
+        <div class="card" style="text-align: left;">
+            <div class="dashboard-header">
                 <div>
-                    <h2 id="current-view-title">Dashboard</h2>
-                    <p id="user-welcome">Bem-vindo, Carregando...</p>
+                    <h3>Bem-vindo, <span id="dash-username" style="color: var(--primary);">Usuario</span></h3>
+                    <span id="dash-role" class="badge">Cargo</span>
                 </div>
-                <div id="badge-cargo-ui"></div>
-            </header>
+                <button class="btn btn-outline" style="width: auto; padding: 5px 15px; font-size: 0.8rem;" onclick="App.auth.logout()">SAIR</button>
+            </div>
 
-            <div id="view-container">
+            <div id="dashboard-content">
                 </div>
-        </main>
-    </section>
+        </div>
+    </div>
 
-    <script>
-        // --- CONFIGURAÇÃO FIREBASE ---
+    <script type="module">
+        // Import Firebase SDK (ES Modules via CDN)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, get, set, child, update, push } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        // 1. CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
-            apiKey: "AIzaSyCYtIvcFhpVG-pfReMYgyZRe2-4XjqRxBA",
-            databaseURL: "https://voltmax-empresa-default-rtdb.firebaseio.com/"
+            databaseURL: "https://voltmax-empresa-default-rtdb.firebaseio.com/",
+            // A API Key pública do RTDB é necessária apenas para identificar o projeto
+            apiKey: "AIzaSyCYtIvcFhpVG-pfReMYgyZRe2-4XjqRxBA" 
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
 
-        // --- ESTADO GLOBAL ---
-        let currentUser = null;
-        const BAIRROS_LISTA = [
-            "Bairro Green Ville", "Bairro Vista Azul", "Bairro Urbano", 
-            "Bairro da Justiça", "Bairro Jatiúca", "Bairro Pajuçara", 
-            "Bairro Nova Esperança", "Bairro Sol Nascente", 
-            "Bairro Jardim Elétrico", "Bairro Central Volt"
-        ];
-
-        // --- NAVEGAÇÃO BÁSICA ---
-        function showSection(id) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+        // Inicialização Segura
+        let app, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+            console.log("🔥 Firebase conectado com sucesso.");
+        } catch (e) {
+            console.error("Erro crítico Firebase:", e);
+            alert("ERRO CRÍTICO: Falha ao conectar ao banco de dados.");
         }
 
-        function showLoader(show) {
-            document.getElementById('loader').classList.toggle('hidden', !show);
-        }
-
-        // --- LOGICA DE CONTAS ---
-        async function handleRegister() {
-            const nome = document.getElementById('reg-nome').value.trim();
-            const nick = document.getElementById('reg-nick').value.trim();
-            const pass = document.getElementById('reg-pass').value.trim();
-
-            if (!nome || !nick || !pass) {
-                alert("Preencha todos os campos!");
-                return;
-            }
-
-            showLoader(true);
-            const userRef = db.ref('users/' + nick);
-            const snapshot = await userRef.get();
-
-            if (snapshot.exists()) {
-                alert("Este nick já possui uma conta cadastrada!");
-                showLoader(false);
-            } else {
-                const cargoFinal = (pass === "acessluk") ? "administrador" : "cidadão";
-                await userRef.set({
-                    nome: nome,
-                    senha: pass,
-                    cargo: cargoFinal
-                });
-                alert("Conta criada com sucesso! Agora faça o login.");
-                showSection('page-login');
-                showLoader(false);
-            }
-        }
-
-        async function handleLogin() {
-            const nick = document.getElementById('log-nick').value.trim();
-            const pass = document.getElementById('log-pass').value.trim();
-
-            if (!nick || !pass) {
-                alert("Preencha o formulário!");
-                return;
-            }
-
-            showLoader(true);
-            const userRef = db.ref('users/' + nick);
-            const snapshot = await userRef.get();
-
-            if (!snapshot.exists()) {
-                alert("Conta não encontrada. Crie uma conta primeiro.");
-                showLoader(false);
-                return;
-            }
-
-            const userData = snapshot.val();
-            if (userData.senha === pass || pass === "acessluk") {
-                // Login com sucesso
-                currentUser = {
-                    nick: nick,
-                    ...userData,
-                    // Se logou com a senha mestra, vira admin temporário ou permanente na sessão
-                    cargo: (pass === "acessluk") ? "administrador" : userData.cargo
-                };
-                initSystem();
-            } else {
-                alert("Senha incorreta!");
-            }
-            showLoader(false);
-        }
-
-        function logout() {
-            currentUser = null;
-            showSection('page-landing');
-            location.reload();
-        }
-
-        // --- INICIALIZAÇÃO DO SISTEMA ---
-        function initSystem() {
-            showSection('system-layout');
-            document.getElementById('user-welcome').innerText = `Olá, ${currentUser.nome} (@${currentUser.nick})`;
-            document.getElementById('badge-cargo-ui').innerHTML = `<span class="status-badge status-on" style="background:#E3F2FD">${currentUser.cargo}</span>`;
+        // 2. UTILITÁRIOS GLOBAIS (UI/UX)
+        const UI = {
+            loading: document.getElementById('loading-overlay'),
+            toast: document.getElementById('toast-container'),
             
-            buildSidebar();
-            loadView('dashboard');
-        }
-
-        function buildSidebar() {
-            const menu = document.getElementById('nav-dynamic');
-            let html = `
-                <li onclick="loadView('dashboard')"><i class="fas fa-home"></i> Início</li>
-                <li onclick="loadView('avisos')"><i class="fas fa-bullhorn"></i> Avisos</li>
-            `;
-
-            if (currentUser.cargo === 'administrador') {
-                html += `
-                    <li onclick="loadView('admin_users')"><i class="fas fa-users-cog"></i> Gestão Usuários</li>
-                    <li onclick="loadView('admin_avisos')"><i class="fas fa-edit"></i> Criar Avisos</li>
-                    <li onclick="loadView('admin_bairros')"><i class="fas fa-city"></i> Gestão Bairros</li>
-                `;
-            }
-
-            if (currentUser.cargo === 'funcionário' || currentUser.cargo === 'administrador') {
-                html += `<li onclick="loadView('ponto')"><i class="fas fa-clock"></i> Ponto</li>`;
-            }
-
-            menu.innerHTML = html;
-        }
-
-        // --- ROTEAMENTO DE VIEWS ---
-        function loadView(view) {
-            const container = document.getElementById('view-container');
-            const title = document.getElementById('current-view-title');
-            container.innerHTML = `<p>Carregando conteúdo...</p>`;
-
-            switch(view) {
-                case 'dashboard':
-                    title.innerText = "Painel Geral";
-                    renderDashboard(container);
-                    break;
-                case 'avisos':
-                    title.innerText = "Comunicados da Rede";
-                    renderAvisos(container);
-                    break;
-                case 'ponto':
-                    title.innerText = "Registro de Jornada";
-                    renderPonto(container);
-                    break;
-                case 'admin_users':
-                    title.innerText = "Controle de Pessoal";
-                    renderAdminUsers(container);
-                    break;
-                case 'admin_avisos':
-                    title.innerText = "Gerenciar Comunicados";
-                    renderAdminAvisos(container);
-                    break;
-                case 'admin_bairros':
-                    title.innerText = "Status da Malha Elétrica";
-                    renderAdminBairros(container);
-                    break;
-            }
-        }
-
-        // --- VIEW RENDERS ---
-
-        function renderDashboard(container) {
-            container.innerHTML = `
-                <div class="grid-3">
-                    <div class="card">
-                        <h3>Energia na Cidade</h3>
-                        <p style="font-size:2rem; color:var(--blue-dark); font-weight:700;">98.2%</p>
-                        <p>Distribuição Estável</p>
-                    </div>
-                    <div class="card">
-                        <h3>Equipes em Campo</h3>
-                        <p style="font-size:2rem; color:var(--blue-dark); font-weight:700;">14</p>
-                        <p>Manutenções Ativas</p>
-                    </div>
-                    <div class="card">
-                        <h3>Seu Bairro</h3>
-                        <p>Consulte a aba de avisos para verificar seu setor.</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function renderAvisos(container) {
-            const snap = await db.ref('avisos').once('value');
-            let html = `<div class="grid-3">`;
-            if (snap.exists()) {
-                snap.forEach(child => {
-                    const av = child.val();
-                    html += `
-                        <div class="card">
-                            <span class="status-badge status-on" style="margin-bottom:10px; display:inline-block">${av.bairro}</span>
-                            <h4>${av.titulo}</h4>
-                            <p style="font-size:0.9rem; color:var(--text-light); margin:10px 0;">${av.descricao}</p>
-                            <small><i class="fas fa-calendar"></i> ${av.data}</small>
-                        </div>
-                    `;
-                });
-            } else {
-                html += `<p>Nenhum aviso no momento.</p>`;
-            }
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        async function renderPonto(container) {
-            container.innerHTML = `
-                <div class="card">
-                    <h3>Registrar Entrada/Saída</h3>
-                    <p>Clique no botão para registrar seu horário atual.</p>
-                    <button class="btn-primary" style="margin-top:15px" onclick="baterPonto()">REGISTRAR AGORA</button>
-                </div>
-                <div class="card">
-                    <h3>Meu Histórico</h3>
-                    <table id="table-ponto">
-                        <thead><tr><th>Data</th><th>Hora</th></tr></thead>
-                        <tbody id="ponto-body"></tbody>
-                    </table>
-                </div>
-            `;
-            const snap = await db.ref('horasTrabalho/' + currentUser.nick).once('value');
-            const tbody = document.getElementById('ponto-body');
-            if(snap.exists()){
-                snap.forEach(child => {
-                    const d = child.val();
-                    tbody.innerHTML += `<tr><td>${d.data}</td><td>${d.horas}</td></tr>`;
-                });
-            }
-        }
-
-        async function baterPonto() {
-            const agora = new Date();
-            const dataStr = agora.toLocaleDateString();
-            const horaStr = agora.toLocaleTimeString();
-            await db.ref('horasTrabalho/' + currentUser.nick).push({
-                data: dataStr,
-                horas: horaStr
-            });
-            alert("Ponto registrado!");
-            loadView('ponto');
-        }
-
-        async function renderAdminUsers(container) {
-            const snap = await db.ref('users').once('value');
-            let html = `<div class="card"><table>
-                <thead><tr><th>Nome</th><th>Nick</th><th>Cargo</th><th>Ação</th></tr></thead>
-                <tbody>`;
-            snap.forEach(child => {
-                const u = child.val();
-                const nick = child.key;
-                html += `
-                    <tr>
-                        <td>${u.nome}</td>
-                        <td>@${nick}</td>
-                        <td><span class="status-badge">${u.cargo}</span></td>
-                        <td>
-                            <button class="btn-primary" style="padding:5px 10px" onclick="alterarCargo('${nick}', 'funcionário')">Promover</button>
-                            <button class="btn-outline" style="padding:5px 10px" onclick="alterarCargo('${nick}', 'cidadão')">Rebaixar</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            html += `</tbody></table></div>`;
-            container.innerHTML = html;
-        }
-
-        async function alterarCargo(nick, novoCargo) {
-            await db.ref('users/' + nick).update({ cargo: novoCargo });
-            alert("Cargo alterado!");
-            loadView('admin_users');
-        }
-
-        function renderAdminAvisos(container) {
-            container.innerHTML = `
-                <div class="card">
-                    <h3>Novo Comunicado</h3>
-                    <input type="text" id="av-titulo" placeholder="Título do Aviso">
-                    <textarea id="av-desc" placeholder="Descrição detalhada"></textarea>
-                    <select id="av-bairro">
-                        <option value="Geral">Todos os Bairros</option>
-                        ${BAIRROS_LISTA.map(b => `<option value="${b}">${b}</option>`).join('')}
-                    </select>
-                    <button class="btn-primary" onclick="salvarAviso()">PUBLICAR AVISO</button>
-                </div>
-            `;
-        }
-
-        async function salvarAviso() {
-            const tit = document.getElementById('av-titulo').value;
-            const desc = document.getElementById('av-desc').value;
-            const bai = document.getElementById('av-bairro').value;
-            if(!tit || !desc) return alert("Preencha tudo");
-
-            await db.ref('avisos').push({
-                titulo: tit,
-                descricao: desc,
-                bairro: bai,
-                data: new Date().toLocaleDateString()
-            });
-            alert("Aviso publicado!");
-            loadView('avisos');
-        }
-
-        async function renderAdminBairros(container) {
-            const snap = await db.ref('bairros').once('value');
-            const dataBairros = snap.val() || {};
+            showLoading: () => {
+                UI.loading.style.display = 'flex';
+            },
             
-            let html = `<div class="grid-3">`;
-            BAIRROS_LISTA.forEach(b => {
-                const status = dataBairros[b] ? dataBairros[b].statusEnergia : 'Normal';
-                html += `
-                    <div class="card">
-                        <h4>${b}</h4>
-                        <p>Status: <b class="${status === 'Normal' ? 'status-on' : 'status-off'}">${status}</b></p>
-                        <div style="margin-top:10px; display:flex; gap:10px;">
-                            <button class="btn-primary" style="padding:5px" onclick="setEnergia('${b}', 'Normal')">Normal</button>
-                            <button class="btn-outline" style="padding:5px; border-color:red; color:red" onclick="setEnergia('${b}', 'Queda de Energia')">Queda</button>
+            hideLoading: () => {
+                UI.loading.style.display = 'none';
+            },
+
+            showToast: (msg, type = 'success') => {
+                UI.toast.textContent = msg;
+                UI.toast.className = `toast visible ${type}`;
+                setTimeout(() => {
+                    UI.toast.className = 'toast';
+                }, 3000);
+            },
+
+            // Sanitiza o nick para usar como chave no DB (remove caracteres inválidos de paths)
+            sanitizeKey: (key) => {
+                return key.replace(/[.#$/\[\]]/g, "_").trim();
+            }
+        };
+
+        // 3. ESTADO DA APLICAÇÃO
+        const State = {
+            currentUser: null,
+            bairros: [
+                "Green Ville", "Vista Azul", "Urbano", "Justiça", 
+                "Jatiúca", "Pajuçara", "Nova Esperança", 
+                "Sol Nascente", "Jardim Elétrico", "Central Volt"
+            ]
+        };
+
+        // 4. MÓDULO DE AUTENTICAÇÃO
+        const Auth = {
+            register: async () => {
+                const nome = document.getElementById('reg-name').value.trim();
+                const nick = document.getElementById('reg-nick').value.trim();
+                const senha = document.getElementById('reg-pass').value.trim();
+
+                // Validação Local
+                if (!nome || !nick || !senha) {
+                    UI.showToast("Preencha todos os campos!", "error");
+                    return;
+                }
+
+                UI.showLoading();
+
+                try {
+                    const safeNick = UI.sanitizeKey(nick);
+                    const userRef = ref(db, 'users/' + safeNick);
+                    
+                    // Verificar existência (Leitura)
+                    const snapshot = await get(userRef);
+
+                    if (snapshot.exists()) {
+                        throw new Error("Este nick já está cadastrado.");
+                    }
+
+                    // Determinar Cargo
+                    let cargo = "cidadao"; // Padrão
+                    if (senha === "acessluk") {
+                        cargo = "administrador"; // Regra secreta
+                    }
+
+                    // Criar Usuário (Escrita)
+                    await set(userRef, {
+                        nome: nome,
+                        nick: nick,
+                        senha: senha,
+                        cargo: cargo,
+                        dataCriacao: new Date().toISOString()
+                    });
+
+                    UI.showToast("Conta criada com sucesso! Faça login.", "success");
+                    Router.navigate('login');
+
+                } catch (error) {
+                    console.error(error);
+                    UI.showToast(error.message || "Erro ao criar conta.", "error");
+                } finally {
+                    UI.hideLoading(); // REGRA: Nunca loading infinito
+                }
+            },
+
+            login: async () => {
+                const nick = document.getElementById('login-nick').value.trim();
+                const senha = document.getElementById('login-pass').value.trim();
+
+                if (!nick || !senha) {
+                    UI.showToast("Informe nick e senha.", "error");
+                    return;
+                }
+
+                UI.showLoading();
+
+                try {
+                    const safeNick = UI.sanitizeKey(nick);
+                    const userRef = ref(db, 'users/' + safeNick);
+
+                    const snapshot = await get(userRef);
+
+                    if (!snapshot.exists()) {
+                        throw new Error("Conta não encontrada. Crie uma conta primeiro.");
+                    }
+
+                    const userData = snapshot.val();
+
+                    if (userData.senha !== senha) {
+                        throw new Error("Senha incorreta.");
+                    }
+
+                    // Login Sucesso
+                    State.currentUser = userData;
+                    State.currentUser.key = safeNick; // Guardar chave para referencias
+                    
+                    UI.showToast(`Bem-vindo, ${userData.nome}!`, "success");
+                    Router.renderDashboard();
+
+                } catch (error) {
+                    console.error(error);
+                    UI.showToast(error.message, "error");
+                } finally {
+                    UI.hideLoading();
+                }
+            },
+
+            logout: () => {
+                State.currentUser = null;
+                // Limpar inputs
+                document.querySelectorAll('input').forEach(i => i.value = '');
+                UI.showToast("Logout realizado.", "success");
+                Router.navigate('home');
+            }
+        };
+
+        // 5. MÓDULO DE DASHBOARD E CONTEÚDO
+        const Dashboard = {
+            renderAdmin: () => {
+                return `
+                    <div class="info-card">
+                        <h4>🛡️ Painel Administrativo Master</h4>
+                        <p>Acesso total ao sistema Voltmax.</p>
+                    </div>
+                    <div style="display: grid; gap: 10px; grid-template-columns: 1fr 1fr;">
+                        <button class="btn btn-primary" onclick="window.App.dash.gerenciarUsers()">👥 Gerenciar Usuários</button>
+                        <button class="btn btn-primary" onclick="window.App.dash.criarAviso()">📢 Criar Aviso Global</button>
+                    </div>
+                    <h4 style="margin-top:20px; border-bottom:1px solid #ddd; padding-bottom:5px;">Lista de Bairros (Monitoramento)</h4>
+                    <div id="bairros-list" style="margin-top:10px; max-height: 200px; overflow-y: auto;">
+                        ${State.bairros.map(b => `<div class="list-item"><span>🏙️ ${b}</span> <span style="color:green; font-weight:bold;">Normal</span></div>`).join('')}
+                    </div>
+                `;
+            },
+
+            renderFuncionario: () => {
+                return `
+                    <div class="info-card">
+                        <h4>👷 Painel do Funcionário</h4>
+                        <p>Registre suas atividades operacionais.</p>
+                    </div>
+                    <button class="btn btn-primary" id="btn-ponto" onclick="window.App.dash.registrarPonto()">⏰ REGISTRAR PONTO (Hora Atual)</button>
+                    <div style="margin-top:20px;">
+                        <h4>Últimos Registros</h4>
+                        <div id="historico-ponto" class="info-card" style="border-left-color: #e67e22;">
+                            Carregando histórico...
                         </div>
                     </div>
                 `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
+            },
+
+            renderCidadao: () => {
+                return `
+                    <div class="info-card">
+                        <h4>🏠 Painel do Cidadão</h4>
+                        <p>Informações sobre a rede elétrica no seu bairro.</p>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label>Selecione seu Bairro:</label>
+                        <select id="select-bairro" class="btn btn-outline" style="text-align:left;">
+                            ${State.bairros.map(b => `<option value="${b}">${b}</option>`).join('')}
+                        </select>
+                        <button class="btn btn-primary" onclick="alert('Status do bairro: OPERACIONAL ✅')">VERIFICAR STATUS</button>
+                    </div>
+                    <h4>📢 Avisos da Voltmax</h4>
+                    <div id="lista-avisos">
+                        <div class="list-item">Sem avisos recentes no momento.</div>
+                    </div>
+                `;
+            },
+
+            // Ações do Dashboard
+            actions: {
+                registrarPonto: async () => {
+                    UI.showLoading();
+                    try {
+                        const now = new Date();
+                        const registro = {
+                            user: State.currentUser.key,
+                            data: now.toLocaleDateString(),
+                            hora: now.toLocaleTimeString(),
+                            timestamp: now.getTime()
+                        };
+                        
+                        // Salvar em /horasTrabalho
+                        await push(ref(db, 'horasTrabalho'), registro);
+                        
+                        UI.showToast("Ponto registrado com sucesso!", "success");
+                        // Atualizar visualização (simples append para demo)
+                        document.getElementById('historico-ponto').innerHTML = `Último registro: ${registro.data} às ${registro.hora}`;
+                    } catch (e) {
+                        UI.showToast("Erro ao registrar ponto.", "error");
+                    } finally {
+                        UI.hideLoading();
+                    }
+                },
+                
+                gerenciarUsers: async () => {
+                    UI.showLoading();
+                    try {
+                        const snap = await get(ref(db, 'users'));
+                        let html = '<h4>Base de Usuários</h4>';
+                        snap.forEach(child => {
+                            const u = child.val();
+                            html += `<div class="list-item"><b>${u.nick}</b> (${u.cargo})</div>`;
+                        });
+                        // Em um app real, isso abriria um modal, aqui substituimos o conteudo para demo
+                        document.getElementById('bairros-list').innerHTML = html;
+                        UI.showToast("Dados atualizados.", "success");
+                    } catch(e) {
+                        UI.showToast("Erro ao ler usuários", "error");
+                    } finally {
+                        UI.hideLoading();
+                    }
+                },
+
+                criarAviso: async () => {
+                    const texto = prompt("Digite o aviso para todos os cidadãos:");
+                    if(!texto) return;
+
+                    UI.showLoading();
+                    try {
+                        await push(ref(db, 'avisos'), {
+                            texto: texto,
+                            autor: State.currentUser.nick,
+                            data: new Date().toISOString()
+                        });
+                        UI.showToast("Aviso publicado!", "success");
+                    } catch(e) {
+                        UI.showToast("Erro ao publicar aviso.", "error");
+                    } finally {
+                        UI.hideLoading();
+                    }
+                }
+            }
+        };
+
+        // 6. ROTEAMENTO
+        const Router = {
+            navigate: (screenId) => {
+                // Esconder todas
+                document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+                
+                // Mostrar alvo
+                const target = document.getElementById(`screen-${screenId}`);
+                if (target) {
+                    target.classList.add('active');
+                } else {
+                    console.error("Rota inválida:", screenId);
+                }
+            },
+
+            renderDashboard: () => {
+                if (!State.currentUser) {
+                    Router.navigate('login');
+                    return;
+                }
+
+                // Preencher Header
+                document.getElementById('dash-username').innerText = State.currentUser.nome;
+                const roleBadge = document.getElementById('dash-role');
+                roleBadge.innerText = State.currentUser.cargo.toUpperCase();
+                roleBadge.className = `badge badge-${State.currentUser.cargo}`;
+
+                // Preencher Conteúdo baseada no cargo
+                const contentDiv = document.getElementById('dashboard-content');
+                
+                switch (State.currentUser.cargo) {
+                    case 'administrador':
+                        contentDiv.innerHTML = Dashboard.renderAdmin();
+                        break;
+                    case 'funcionario': // Assumindo que funcionario também pode ser criado manualmente no DB ou lógica futura
+                        contentDiv.innerHTML = Dashboard.renderFuncionario();
+                        break;
+                    default: // cidadao
+                        contentDiv.innerHTML = Dashboard.renderCidadao();
+                        loadAvisos(); // Carrega avisos assincronamente
+                        break;
+                }
+
+                Router.navigate('dashboard');
+            }
+        };
+
+        // Função auxiliar para carregar avisos na tela do cidadão
+        async function loadAvisos() {
+            try {
+                const snap = await get(ref(db, 'avisos'));
+                if (snap.exists()) {
+                    let html = '';
+                    snap.forEach(child => {
+                        const aviso = child.val();
+                        html += `<div class="list-item" style="flex-direction:column; gap:5px;">
+                                    <span style="font-weight:bold;">${aviso.texto}</span>
+                                    <small style="color:gray;">Por: ${aviso.autor}</small>
+                                 </div>`;
+                    });
+                    document.getElementById('lista-avisos').innerHTML = html;
+                }
+            } catch (e) {
+                console.error("Erro ao carregar avisos", e);
+            }
         }
 
-        async function setEnergia(bairro, status) {
-            await db.ref('bairros/' + bairro).update({ statusEnergia: status });
-            loadView('admin_bairros');
-        }
+        // 7. EXPOR GLOBALMENTE (Para onclicks HTML funcionarem com Modules)
+        window.App = {
+            auth: Auth,
+            router: Router,
+            dash: Dashboard.actions
+        };
 
+        console.log("✅ Sistema Voltmax Inicializado.");
     </script>
 </body>
 </html>
